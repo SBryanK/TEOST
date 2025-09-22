@@ -113,6 +113,9 @@ data class TestResultDetails(
     val securityEffectiveness: Double? = null, // Percentage of blocked requests
     val trafficAnalysis: String? = null, // Detailed analysis of when/how traffic was blocked
     
+    // Network Diagnosis Logs
+    val networkLogs: List<String>? = null, // ✅ ADD NETWORK LOGS FIELD
+    
     // Parameters Snapshot
     val paramsSnapshot: TestParameters? = null
 ) : Parcelable

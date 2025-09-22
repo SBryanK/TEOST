@@ -232,15 +232,21 @@ class SecurityTestEngine @Inject constructor(
         val pathBase = params.requestPath ?: "/"
         val blocked = mutableListOf<String>()
         val passed = mutableListOf<String>()
+        val networkLogs = mutableListOf<String>() // ✅ ADD NETWORK LOGS
         val start = System.currentTimeMillis()
         payloads.forEach { p ->
             val sep = if (pathBase.endsWith("/")) "" else "/"
             val url = "https://${config.domain}$pathBase$sep$p"
             try {
-                val (resp, _) = requestWithTimings(url, headers = params.headersOverrides ?: emptyMap())
+                val (resp, tm) = requestWithTimings(url, headers = params.headersOverrides ?: emptyMap())
+                // ✅ ADD NETWORK DIAGNOSIS LOG
+                networkLogs.add("${System.currentTimeMillis()}: GET $url -> HTTP ${resp.code} (DNS: ${tm.dnsMs}ms, TCP: ${tm.tcpMs}ms, SSL: ${tm.sslMs}ms, TTFB: ${tm.ttfbMs}ms)")
                 if (resp.code in listOf(403, 406)) blocked.add(p) else passed.add(p)
                 delay(100)
-            } catch (_: Exception) { blocked.add(p) }
+            } catch (e: Exception) { 
+                blocked.add(p)
+                networkLogs.add("${System.currentTimeMillis()}: ERROR - ${e.message}")
+            }
         }
         val end = System.currentTimeMillis()
         TestResult(
@@ -269,6 +275,7 @@ class SecurityTestEngine @Inject constructor(
                         appendLine("⚠️ BYPASSED Payloads (${passed.size}): ${passed.joinToString(", ")}")
                     }
                 },
+                networkLogs = networkLogs, // ✅ ADD NETWORK LOGS
                 paramsSnapshot = config.parameters
             ),
             userId = ""
@@ -427,6 +434,7 @@ class SecurityTestEngine @Inject constructor(
         val blockedPayloads = mutableListOf<String>()
         val passedPayloads = mutableListOf<String>()
         val startTime = System.currentTimeMillis()
+        val networkLogs = mutableListOf<String>()
         payloads.forEach { payload ->
             try {
                 val encodedPayload = when (params.encodingMode) {
@@ -449,20 +457,39 @@ class SecurityTestEngine @Inject constructor(
                 }
                 val response = respPair.first
                 val tm = respPair.second
+                
+                // ✅ ADD NETWORK DIAGNOSIS LOG
+                networkLogs.add("${System.currentTimeMillis()}: ${params.httpMethod?.name ?: "GET"} $url -> HTTP ${response.code} (DNS: ${tm.dnsMs}ms, TCP: ${tm.tcpMs}ms, SSL: ${tm.sslMs}ms, TTFB: ${tm.ttfbMs}ms)")
+                
                 if (response.code == 403 || response.code == 406) blockedPayloads.add(payload) else passedPayloads.add(payload)
                 response.close()
                 delay(100)
             } catch (e: Exception) {
                 blockedPayloads.add(payload)
+                networkLogs.add("${System.currentTimeMillis()}: ERROR - ${e.message}")
             }
         }
         val endTime = System.currentTimeMillis()
         val wafEffectiveness = if (payloads.isNotEmpty()) (blockedPayloads.size.toDouble() / payloads.size) * 100 else 0.0
+        // ✅ DETERMINE CORRECT TEST NAME BASED ON PAYLOAD TYPE
+        val testType = when {
+            payloads.any { it.contains("<script", true) || it.contains("alert(", true) || it.contains("javascript:", true) } -> TestType.XssTest
+            payloads.any { it.contains("' OR ", true) || it.contains("UNION SELECT", true) || it.contains("DROP TABLE", true) } -> TestType.SqlInjection
+            payloads.any { it.contains("../", true) || it.contains("..\\", true) || it.contains("etc/passwd", true) } -> TestType.PathTraversal
+            else -> TestType.SqlInjection
+        }
+        val testName = when (testType) {
+            TestType.SqlInjection -> "SQL Injection Test"
+            TestType.XssTest -> "XSS Attack Test"
+            TestType.PathTraversal -> "Path Traversal Test"
+            else -> "WAF Security Test"
+        }
+        
         return@withContext TestResult(
             testId = config.testId,
-            testName = "WAF Validation",
+            testName = testName, // ✅ CORRECT TEST NAME
             category = TestCategory.WEB_PROTECTION,
-            type = if (payloads.any { it.contains("<script", true) }) TestType.XssTest else TestType.SqlInjection,
+            type = testType, // ✅ CORRECT TEST TYPE
             domain = config.domain,
             ipAddress = config.ipAddress,
             status = if (wafEffectiveness > 80) TestStatus.FAILED else TestStatus.SUCCESS, // FAILED = blocked (good security), SUCCESS = bypass
@@ -490,6 +517,7 @@ class SecurityTestEngine @Inject constructor(
                 tcpHandshakeTime = null,
                 sslHandshakeTime = null,
                 ttfb = null,
+                networkLogs = networkLogs, // ✅ ADD NETWORK LOGS
                 paramsSnapshot = config.parameters
             ),
             userId = ""

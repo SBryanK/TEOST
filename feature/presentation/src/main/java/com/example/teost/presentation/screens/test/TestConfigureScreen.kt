@@ -1312,42 +1312,76 @@ fun TestConfigureScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     
-                    // ✅ CONCURRENCY LEVEL - Thread count
-                    com.example.teost.presentation.screens.test.components.SliderConfig(
-                        label = "Concurrent Threads",
-                        value = state.params.concurrencyLevel ?: 5,
-                        onValueChange = { v -> configVm.updateParams(state.params.copy(concurrencyLevel = v)) },
-                        valueRange = 1..20,
-                        step = 1
+                    // ✅ CONCURRENCY LEVEL - Thread count (FLEXIBLE INPUT)
+                    OutlinedTextField(
+                        value = (state.params.concurrencyLevel ?: 5).toString(),
+                        onValueChange = { value ->
+                            if (value.isEmpty()) {
+                                configVm.updateParams(state.params.copy(concurrencyLevel = 5))
+                            } else {
+                                value.toIntOrNull()?.let { threads ->
+                                    configVm.updateParams(state.params.copy(concurrencyLevel = threads.coerceIn(1, 50)))
+                                }
+                            }
+                        },
+                        label = { Text("Concurrent Threads") },
+                        supportingText = { Text("Number of parallel threads (1-50)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
                     )
                     
-                    // ✅ DURATION - Maximum test duration (hybrid approach)
-                    com.example.teost.presentation.screens.test.components.SliderConfig(
-                        label = "Maximum Duration",
-                        value = state.params.durationSec ?: 60,
-                        onValueChange = { v -> configVm.updateParams(state.params.copy(durationSec = v)) },
-                        valueRange = 10..300,
-                        step = 10,
-                        unitSuffix = "seconds"
+                    // ✅ DURATION - Maximum test duration (FLEXIBLE INPUT)
+                    OutlinedTextField(
+                        value = (state.params.durationSec ?: 60).toString(),
+                        onValueChange = { value ->
+                            if (value.isEmpty()) {
+                                configVm.updateParams(state.params.copy(durationSec = 60))
+                            } else {
+                                value.toIntOrNull()?.let { duration ->
+                                    configVm.updateParams(state.params.copy(durationSec = duration.coerceIn(5, 600)))
+                                }
+                            }
+                        },
+                        label = { Text("Test Duration (seconds)") },
+                        supportingText = { Text("Duration for the test (5-600 seconds)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 "ConnectionFlood" -> {
                     HorizontalDivider()
                     Text("Traffic Parameters", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    com.example.teost.presentation.screens.test.components.SliderConfig(
-                        label = "Concurrent Users",
-                        value = state.params.concurrencyLevel ?: 5, // Median of 1-10
-                        onValueChange = { v -> configVm.updateParams(state.params.copy(concurrencyLevel = v)) },
-                        valueRange = 1..10, // Safe range for testing
-                        step = 1
+                    OutlinedTextField(
+                        value = (state.params.concurrencyLevel ?: 5).toString(),
+                        onValueChange = { value ->
+                            if (value.isEmpty()) {
+                                configVm.updateParams(state.params.copy(concurrencyLevel = 5))
+                            } else {
+                                value.toIntOrNull()?.let { users ->
+                                    configVm.updateParams(state.params.copy(concurrencyLevel = users.coerceIn(1, 100)))
+                                }
+                            }
+                        },
+                        label = { Text("Concurrent Users") },
+                        supportingText = { Text("Number of concurrent users (1-100)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    com.example.teost.presentation.screens.test.components.SliderConfig(
-                        label = "Test Duration",
-                        value = state.params.durationSec ?: 30, // Median of 10-60
-                        onValueChange = { v -> configVm.updateParams(state.params.copy(durationSec = v)) },
-                        valueRange = 10..60, // Safe range for testing
-                        step = 5,
-                        unitSuffix = "seconds"
+                    OutlinedTextField(
+                        value = (state.params.durationSec ?: 30).toString(),
+                        onValueChange = { value ->
+                            if (value.isEmpty()) {
+                                configVm.updateParams(state.params.copy(durationSec = 30))
+                            } else {
+                                value.toIntOrNull()?.let { duration ->
+                                    configVm.updateParams(state.params.copy(durationSec = duration.coerceIn(5, 300)))
+                                }
+                            }
+                        },
+                        label = { Text("Test Duration (seconds)") },
+                        supportingText = { Text("Duration for connection flood test (5-300 seconds)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 "EnumerationIdor" -> {
