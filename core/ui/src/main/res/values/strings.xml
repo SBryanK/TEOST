@@ -1,0 +1,424 @@
+<resources>
+    <string name="app_name">EdgeOne Security Test</string>
+    <string name="login_title">Welcome Back</string>
+    <string name="login_subtitle">Let\'s Start Testing!</string>
+    <string name="signup_title">Create Account</string>
+    <string name="email_hint">Email Address</string>
+    <string name="password_hint">Password</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="login_button">Login</string>
+    <string name="signup_button">Sign Up</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="already_have_account">Already have an account? Login</string>
+    <string name="dont_have_account">Do not have an account? Sign Up</string>
+    <string name="verify_email_title">Verify Your Email</string>
+    <string name="verify_email_message">We have sent a verification link to your email. Please check your inbox.</string>
+    <string name="resend_verification">Resend Verification Email</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_test">Test</string>
+    <string name="nav_history">History</string>
+    <string name="nav_profile">Profile</string>
+    <string name="validate_connection">Validate Connection</string>
+    <string name="enter_domain_hint">Enter Domain/URL/IP</string>
+    <string name="test_connection">Test Connection</string>
+    <string name="go_to_tests">Go to Tests</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="ddos_protection">DoS / Network Protection</string>
+    <string name="web_protection">Web Protection (WAF)</string>
+    <string name="bot_management">Bot Management</string>
+    <string name="coming_soon">Coming Soon!</string>
+    <string name="test_history">Test History</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="email_verified_redirecting">Email verified! Redirecting…</string>
+    <string name="http_code_chip">HTTP %1$d</string>
+    <string name="headers">Headers</string>
+    <string name="raw_logs">Logs</string>
+    <string name="export">Export</string>
+    <string name="export_logs">Export Logs</string>
+    <string name="open_logs">Open Logs</string>
+    <string name="share_result">Share result</string>
+    <string name="test_result_title">Test Result</string>
+    <string name="label_domain">Domain</string>
+    <string name="label_test">Test</string>
+    <string name="label_status">Status</string>
+    <string name="label_parameters">Parameters</string>
+    <string name="no_parameters">(no parameters captured)</string>
+    <string name="filter_by">Filter by:</string>
+    <string name="clear_filters">Clear filters</string>
+    <string name="any_status">Any Status</string>
+    <string name="any_type">Any Type</string>
+    <string name="all">All</string>
+    <string name="search_field_label">Search Domain/IP/Test</string>
+    <!-- Error messages -->
+    <string name="error_network_generic">Network error, please check your connection.</string>
+    <string name="error_auth">Authentication error. Please login again.</string>
+    <string name="error_validation">Invalid input.</string>
+    <string name="error_database">Database error.</string>
+    <string name="error_security_test">Security test error.</string>
+    <string name="error_unknown">Something went wrong.</string>
+    
+    <!-- New strings for Search screen spec -->
+    <string name="tip_multi_targets">Tip: Enter multiple URLs/IPs separated by commas, semicolons, or new lines</string>
+    <string name="testing">Testing…</string>
+    <string name="results_header_title">Test Results</string>
+    <string name="results_header_subtitle">Latency, status and headers per target</string>
+    <string name="label_response_time">Response time</string>
+    <string name="label_request_id">Request ID</string>
+    <string name="copy">Copy</string>
+    <string name="dismiss_error">Dismiss error</string>
+    <string name="filter_headers_placeholder">Filter headers…</string>
+    <string name="copy_header">Copy header</string>
+    <string name="copy_all">Copy all</string>
+    <string name="label_body">Body</string>
+    <string name="response_body_encrypted">Response body encrypted for security reasons</string>
+    <string name="edgeone_logo">EdgeOne Logo</string>
+    <string name="teoc_logo">TEOC Logo</string>
+    <string name="cd_name">Name</string>
+    <string name="cd_email">Email</string>
+    <string name="cd_password">Password</string>
+    <string name="cd_confirm_password">Confirm Password</string>
+    <string name="email_input_placeholder">Enter your email address</string>
+    <string name="resend_in_seconds">Resend in %1$ds</string>
+    <string name="refresh_status">Refresh Status</string>
+    <string name="invalid_link">Invalid link</string>
+    <string name="missing_request_id">Missing request id</string>
+    <string name="request_rejected">Request rejected</string>
+    <string name="credits_approved_n">%1$d credits approved</string>
+    <string name="action_failed_or_unauthorized">Action failed or not authorized</string>
+    <string name="help_title">Help</string>
+    <string name="privacy_policy_title">Privacy Policy</string>
+    
+    <!-- Test Execution -->
+    <string name="test_execution_title">Test Execution</string>
+    <string name="preparing_security_tests">Preparing Security Tests</string>
+    <string name="tests_begin_shortly">Your tests will begin shortly...</string>
+    <string name="error_label">Error</string>
+    <string name="test_execution_failed">Test Execution Failed</string>
+    <string name="retry">Retry</string>
+    <string name="timeout_label">Timeout</string>
+    <string name="test_execution_timeout">Test Execution Timeout</string>
+    <string name="tests_timeout_message">Tests took longer than expected. Please try again.</string>
+    <string name="try_again">Try Again</string>
+    <string name="http_response_title">HTTP Response</string>
+    <string name="target_title">Target</string>
+    <string name="back_to_test">Back to Test</string>
+    <string name="success">Success</string>
+    <string name="tests_completed">Tests Completed</string>
+    <string name="tests_successful">%1$d of %2$d tests successful</string>
+    <string name="failed">Failed</string>
+    <string name="summary">Summary</string>
+    <string name="duration">Duration</string>
+    <string name="credits">Credits</string>
+    <string name="go_to_history">Go to History</string>
+    <string name="security_tests">Security Tests</string>
+    <string name="import_config">Import Config</string>
+    <string name="export_share_config">Export/Share Config</string>
+    <string name="use_actions_import_export">Use the actions above to import or export config.</string>
+    <string name="select_category_test">Select %1$s Test</string>
+    <string name="back">Back</string>
+    <string name="use_vpn">Use VPN</string>
+    <string name="cart">Cart</string>
+    <string name="configure">Configure: %1$s</string>
+    <string name="apply_template">Apply template</string>
+    <string name="target_domain">Target domain</string>
+    <string name="targets_multi_select">Targets (multi-select)</string>
+    <string name="select_targets">Select targets</string>
+    <string name="select_all">Select All</string>
+    <string name="clear_selection">Clear</string>
+    <string name="single_target_fallback">Single target (fallback)</string>
+    <string name="unsupported_test_type">Unsupported test type</string>
+    <string name="unsupported_test_type_hint">Use DoS Spike or Connection Flood to validate rate limiting.</string>
+    <string name="label_target_path">target_path</string>
+    <string name="label_port">port</string>
+    <string name="label_number">number</string>
+    <string name="label_payload">payload</string>
+    <string name="label_payload_list">payload_list (one per line)</string>
+    <string name="label_encoding_mode">encoding_mode (NONE/URL_ENCODE/BASE64)</string>
+    <string name="label_injection_point">injection_point (QUERY_PARAM/PATH_PARAM/BODY)</string>
+    <string name="label_target_param">target_param</string>
+    <string name="label_http_method">HTTP Method</string>
+    <string name="label_request_path">Request Path</string>
+    <string name="label_headers">HTTP Headers (Header: Value per line)</string>
+    <string name="label_body_size_kb">Body Size (KB)</string>
+    <string name="label_json_field_count">JSON Field Count</string>
+    <string name="label_ua_profiles">User Agent Profiles (one per line)</string>
+    <string name="label_header_minimal">Minimal Headers</string>
+    <string name="label_ua_profile">User Agent Profile</string>
+    <string name="label_cookie_policy">Cookie Policy</string>
+    <string name="label_crawl_depth">Crawl Depth</string>
+    <string name="label_respect_robots">Respect Robots.txt</string>
+    <string name="label_rps_target">Requests Per Second</string>
+    <string name="label_window_sec">Time Window (seconds)</string>
+    <string name="label_fingerprint_mode">Fingerprint Mode</string>
+    <string name="label_api_endpoint">API Endpoint</string>
+    <string name="label_auth_mode">Authentication Mode</string>
+    <string name="label_auth_token">Authentication Token</string>
+    <string name="label_username">Username</string>
+    <string name="label_password_list">Password List (one per line)</string>
+    <string name="label_enum_template">Enumeration Template</string>
+    <string name="label_fuzz_cases">Fuzz Test Cases (one per line)</string>
+    <string name="label_content_types">Content Types (comma separated)</string>
+    <string name="dos_spike_params">DoS Spike Parameters</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="conn_flood">Connection Flood</string>
+    <string name="tcp_reachability">TCP Reachability</string>
+    <string name="udp_reachability">UDP Reachability</string>
+    <string name="waf_params">WAF Parameters</string>
+    <string name="edge_rate_limiting">Edge Rate Limiting</string>
+    <string name="path_traversal">Path Traversal</string>
+    <string name="custom_rules_validation">Custom Rules Validation</string>
+    <string name="oversized_body">Oversized Body</string>
+    <string name="bot_params">Bot Parameters</string>
+    <string name="crawler_simulation">Crawler Simulation</string>
+    <string name="api_rate_params">API Rate Parameters</string>
+    <string name="api_auth">API Auth</string>
+    <string name="api_bruteforce">API Brute Force</string>
+    <string name="api_enumeration">API Enumeration</string>
+    <string name="api_schema_validation">API Schema Validation</string>
+    <string name="api_business_logic">API Business Logic</string>
+    <string name="cart_title">Cart</string>
+    <string name="remaining">Remaining: %1$d</string>
+    <string name="used">Used: %1$d</string>
+    <string name="one_credit">1 credit</string>
+    <string name="credits_remaining">Credits remaining</string>
+    <string name="import_plan">Import plan</string>
+    <string name="cart_empty">Your cart is empty</string>
+    <string name="remove">Remove</string>
+    <string name="proceed_confirmation">Proceed to Confirmation</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="ready_to_execute">Ready to Execute</string>
+    <string name="tests">Tests</string>
+    <string name="credits_label">Credits</string>
+    <string name="checking">Checking…</string>
+    <string name="start_security_tests">Start Security Tests</string>
+    <string name="insufficient_credits">Insufficient credits to run all tests</string>
+    <string name="label_used">Used</string>
+    <string name="label_remaining">Remaining</string>
+    <string name="request_credits">Request 50 Credits</string>
+    <string name="request_credits_hint">Admin will receive an email to approve the request.</string>
+    
+    <!-- Profile & Common -->
+    <string name="user_credits">User Credits</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="help">Help</string>
+    <string name="logout">Logout</string>
+    <string name="sign_out_title">Sign out?</string>
+    <string name="sign_out_message">You will be signed out and returned to the login screen.</string>
+    <string name="sign_out">Sign out</string>
+    <string name="cancel">Cancel</string>
+    <string name="export_all">Export All</string>
+    <string name="select_format">Select format</string>
+    <string name="csv_label">CSV</string>
+    <string name="json_label">JSON</string>
+    <!-- Help & Privacy -->
+    <string name="help_body">Use this guide to run tests, read results, and manage settings.</string>
+    <string name="help_quick_start">Quick Start</string>
+    <string name="help_quick_start_points">Open Tests → Pick a category → Configure → Add to Cart → Confirm &amp; Start → Review Success screen or History.</string>
+    <string name="help_navigation">App Navigation</string>
+    <string name="help_nav_points">Tests: browse &amp; configure; Search: quick checks; History: past results; Profile: language &amp; info.</string>
+    <string name="help_tests_screen">Tests Screen</string>
+    <string name="help_tests_points">Import/Export configs under the centered title. Tap a category card to proceed. Uniform cards, colored icons, centered text.</string>
+    <string name="help_configure">Configure Test</string>
+    <string name="help_configure_points">Enter target and adjust parameters. Use dropdowns for options and sliders where applicable. Add to Cart when valid.</string>
+    <string name="help_flow">Confirmation → Execution → Success</string>
+    <string name="help_flow_points">Confirm details, then see a loading overlay. Results show as cards; go to History or back to Tests.</string>
+    <string name="help_search">Search Screen</string>
+    <string name="help_search_points">Quick connection test for a single target. Two-line metric chips. Last results cached for 1 hour.</string>
+    <string name="help_results">Reading Results</string>
+    <string name="help_results_points">Cards summarize status and metrics (DNS, TCP, TTFB, SSL). Use Show more for details and logs.</string>
+    <string name="help_import_export">Import/Export</string>
+    <string name="help_import_export_points">Import JSON to prefill, or Share current config. You’ll see feedback on success or invalid JSON.</string>
+    <string name="help_profile_language">Profile &amp; Language</string>
+    <string name="help_profile_language_points">Toggle EN/中文 instantly. Safe area paddings ensure content isn’t obscured by the navbar.</string>
+    <string name="help_faq_title">FAQ</string>
+    <string name="help_faq_q1">Can I run multiple tests at once?</string>
+    <string name="help_faq_a1">Yes. Add multiple configurations to the cart and confirm.</string>
+    <string name="help_faq_q2">Where do I see finished tests?</string>
+    <string name="help_faq_a2">On the Success screen (inline cards) and in History.</string>
+    <string name="help_faq_q3">Do I need internet to switch languages?</string>
+    <string name="help_faq_a3">No. Language changes apply instantly within the app.</string>
+    <string name="help_faq_q4">What format does Import support?</string>
+    <string name="help_faq_a4">JSON using the app’s configuration schema.</string>
+    <string name="help_faq_q5">Why did my Search results disappear?</string>
+    <string name="help_faq_a5">Search results are cached for 1 hour. After that, rerun the test.</string>
+    <string name="help_faq_q6">How do I read DNS/TCP/TTFB/SSL metrics?</string>
+    <string name="help_faq_a6">They reflect resolution, connection, first byte, and TLS timing respectively. Lower is generally better.</string>
+    <string name="help_faq_q7">How do I report an issue?</string>
+    <string name="help_faq_a7">Use your standard support channel and include screenshots or exported configs if relevant.</string>
+    <string name="privacy_title">Privacy Policy</string>
+    <string name="privacy_body">This is a mock privacy policy. Use this app only on authorized domains. Test results may be cached locally (Room) and preferences stored (DataStore). Avoid sharing PII. Review and adjust your usage according to your organization’s policies.</string>
+    <string name="language_updated">Language updated</string>
+    <string name="language_set_english">Language updated to English</string>
+    <string name="credit_email_draft_opened">Email draft opened for admin approval</string>
+    <string name="credit_requested_no_email">Requested 50 credits (ID: %1$s). Email app not found</string>
+    <string name="credit_request_submitted">Request submitted (ID: %1$s). Admin notified by email.</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_failed">Sync failed</string>
+    <string name="sync_completed">Sync completed</string>
+    <string name="sync_queued">Sync queued</string>
+    
+    <!-- Forgot Password -->
+    <string name="forgot_password_title">Forgot Password?</string>
+    <string name="forgot_password_subtitle">Enter your email address and we will send you a link to reset your password</string>
+    <string name="send_reset_email">Send Reset Email</string>
+    <string name="send_another_email">Send Another Email</string>
+    <string name="reset_email_hint">If an account exists, we have sent a reset link</string>
+    <string name="reset_email_check_inbox">Check your inbox (%1$s) for the password reset email. If you do not see it, check the spam folder.</string>
+    <string name="back_to_login">Back to Login</string>
+    
+    <!-- Login additions -->
+    <string name="remember_me">Remember Me</string>
+    <string name="dont_have_account_prefix">Do not have an account?</string>
+    
+    <!-- Sign Up additions -->
+    <string name="signup_subtitle">Join EdgeOne Security Testing</string>
+    <string name="full_name_required">Full name (required)</string>
+    <string name="full_name_placeholder">Enter your full name</string>
+    <string name="name_helper">Shown on your profile. You can change this later.</string>
+    <string name="email_placeholder">user@example.com</string>
+    <string name="email_invalid">Enter a valid email (e.g., user@example.com)</string>
+    <string name="password_placeholder">Enter your password</string>
+    <string name="hide_password">Hide password</string>
+    <string name="show_password">Show password</string>
+    <string name="password_too_short">Password must be at least 6 characters</string>
+    <string name="confirm_password_placeholder">Confirm your password</string>
+    <string name="passwords_not_match">Passwords do not match</string>
+    <string name="or_separator"> OR </string>
+    
+    <!-- History filters -->
+    <string name="filters_title">Filters</string>
+    <string name="label_category">Category</string>
+    <string name="label_type">Type</string>
+    <string name="domain_contains">Domain contains</string>
+    <string name="from_label">From</string>
+    <string name="to_label">To</string>
+    <string name="ok">OK</string>
+    <!-- Encryption display dialog -->
+    <string name="enc_display_title">Encrypted Body Display</string>
+    <string name="enc_display_text">This app encrypts any captured response body locally and displays Algorithm/Key/IV/Ciphertext for audit. Plaintext is never stored. Large bodies may be truncated before encryption.</string>
+    <string name="apply">Apply</string>
+    
+    <!-- Admin config & email templates removed; handled by backend email service -->
+    <string name="no_results">No results</string>    
+    <!-- Cart type labels (for localized type chips) -->
+    <string name="cart_type_dos">DoS / Rate Limiting</string>
+    <string name="cart_type_waf">WAF</string>
+    <string name="cart_type_bot">Bot Management</string>
+    <string name="cart_type_api">API Test</string>
+    <string name="cart_type_generic">Generic Test</string>
+    <string name="import_failed">Failed to import config: invalid file format.</string>
+    <string name="import_empty">Config imported, but no compatible tests were found.</string>
+    <plurals name="import_success_plurals">
+        <item quantity="one">%d test imported into cart.</item>
+        <item quantity="other">%d tests imported into cart.</item>
+    </plurals>
+
+    <!-- Parameter labels for cart/effective params display -->
+    <string name="param_rps_target">Requests Per Second</string>
+    <string name="param_window_sec">Time Window (seconds)</string>
+    <string name="param_concurrency">Concurrent Users</string>
+    <string name="param_request_path">Request Path</string>
+    <string name="param_body_size_kb">Body Size (KB)</string>
+    <string name="param_encoding_mode">Encoding Mode</string>
+    <string name="param_http_method">HTTP Method</string>
+    <string name="param_injection_point">Injection Point</string>
+    <string name="param_target_param">Target Parameter</string>
+    <string name="param_ua_profiles">User Agent Profiles</string>
+    <string name="param_header_minimal">Minimal Headers</string>
+    <string name="param_cookie_policy_enabled">Cookie Policy</string>
+    <string name="param_crawl_depth">Crawl Depth</string>
+    <string name="param_respect_robots_txt">Respect Robots.txt</string>
+    <string name="param_api_endpoint">API Endpoint</string>
+    <string name="param_auth_mode">Authentication Mode</string>
+    <string name="param_auth_token">Authentication Token</string>
+    <string name="param_username">Username</string>
+    <string name="param_content_types">Content Types</string>
+    <string name="param_port">Port Number</string>
+    <string name="param_timeout_ms">Timeout (milliseconds)</string>
+    <string name="param_retry_count">Retry Count</string>
+    
+    <!-- Boolean Choice Labels -->
+    <string name="choice_enabled">Enabled</string>
+    <string name="choice_disabled">Disabled</string>
+    <string name="choice_yes">Yes</string>
+    <string name="choice_no">No</string>
+    <string name="choice_true">True</string>
+    <string name="choice_false">False</string>
+    
+    <!-- Authentication Mode Choices -->
+    <string name="auth_mode_header">Header</string>
+    <string name="auth_mode_query">Query Parameter</string>
+    <string name="auth_mode_cookie">Cookie</string>
+    
+    <!-- Fingerprint Mode Choices -->
+    <string name="fingerprint_cookie">Cookie-based</string>
+    <string name="fingerprint_device">Device-based</string>
+    <string name="cart_more_params">+%1$d more</string>
+    
+    <!-- Category labels/subtitles -->
+    <string name="api_protection">API Protection</string>
+    <string name="ddos_category_subtitle">Network &amp; Availability</string>
+    <string name="web_category_subtitle">Web Application Firewall</string>
+    <string name="bot_category_subtitle">Bot &amp; Automation Defense</string>
+    <string name="api_category_subtitle">API Security</string>
+
+    <!-- General i18n for chips/metrics -->
+    <string name="metric_dns_ms">DNS %1$dms</string>
+    <string name="metric_ttfb_ms">TTFB %1$dms</string>
+    <string name="metric_tcp_ms">TCP %1$dms</string>
+    <string name="metric_ssl_ms">SSL %1$dms</string>
+    <string name="metric_rps">RPS %1$s</string>
+    <string name="metric_success_pct">Success %1$d%%</string>
+    <string name="metric_errors_pct">Errors %1$d%%</string>
+    <string name="chip_waf">WAF</string>
+    <string name="chip_bot">Bot</string>
+    <string name="no_logs">(no logs)</string>
+
+    <!-- Test/Config helpers -->
+    <string name="invalid_json_config">Invalid JSON config</string>
+    <string name="config_imported">Config imported</string>
+    <string name="cookie_js_challenge">Cookie JS Challenge</string>
+
+    <!-- Language labels -->
+    <string name="lang_en">EN</string>
+    <string name="lang_zh">中文</string>
+
+    <!-- Execution details (placeholders) -->
+    <string name="status_code_label_colon">Status: %1$d</string>
+    <string name="request_id_label_colon">Request-ID: %1$s</string>
+    <string name="response_time_label_colon">Response Time: %1$dms</string>
+    <string name="timing_summary">TTFB: %1$dms, DNS: %2$dms, TCP: %3$dms, SSL: %4$dms</string>
+    <string name="domain_label_colon">Domain: %1$s</string>
+    <string name="type_label_colon">Type: %1$s</string>
+    <string name="server_label_colon">Server: %1$s</string>
+    <string name="cache_control_label_colon">Cache-Control: %1$s</string>
+    <string name="log_line_sample">GET / -&gt; %1$d in %2$dms</string>
+    <string name="metrics_line_sample">metrics: dns=%1$d,tcp=%2$d,ssl=%3$d,ttfb=%4$d</string>
+    <string name="no_app_to_share">No app to share export</string>
+
+    <!-- Numeric suffixes/ranges -->
+    <string name="req_n">%1$d req</string>
+    <string name="sec_int">%1$d s</string>
+    <string name="sec_float">%1$.2f s</string>
+    <string name="rps_n">%1$d rps</string>
+    <string name="range_one_to_hundred">1..100</string>
+    <string name="range_fifty_ms_to_ten_s">50ms..10s</string>
+    <string name="range_one_to_thirty">1..30</string>
+    <string name="range_one_to_sixteen">1..16</string>
+    <string name="range_one_to_fifty">1..50</string>
+    <string name="range_one_to_sixty">1..60</string>
+    <string name="step_label">step: %1$d</string>
+    
+    <!-- Parameter descriptions -->
+    <string name="desc_burst_requests">Number of requests per burst (spike).</string>
+    <string name="desc_burst_interval">Interval between bursts in seconds.</string>
+    <string name="desc_window_sec">Duration of sustained window (seconds).</string>
+    <string name="desc_concurrency">Parallel connections used for the test.</string>
+    <string name="desc_rps">Requests (or connections) initiated per second.</string>
+    <string name="desc_duration_sec">Total test duration in seconds.</string>
+    <string name="desc_concurrent_connections">Simultaneous open connections.</string>
+    <string name="desc_target_path">HTTP path to send requests to.</string>
+</resources>
+
+

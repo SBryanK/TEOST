@@ -1,0 +1,337 @@
+{
+  "template_name": "TEO Security Test - Complete Template",
+  "template_version": "2.0",
+  "description": "Comprehensive template covering all 14 UI-exposed test types with accurate parameters (19 model-defined, 16 engine functions)",
+  "target_domain": "your-domain.com",
+  "test_configurations": [
+    {
+      "test_type": "HttpSpike",
+      "category": "DDOS_PROTECTION", 
+      "enabled": true,
+      "parameters": {
+        "burstRequests": 50,
+        "burstIntervalMs": 100,
+        "concurrencyLevel": 6,
+        "httpMethod": "GET",
+        "requestPath": "/api/search",
+        "customHeaders": {
+          "User-Agent": "TEO-LoadTest/1.0",
+          "X-Test-Type": "HTTP-Spike"
+        },
+        "queryParams": {
+          "q": "test",
+          "limit": "100"
+        },
+        "timeoutMs": 15000,
+        "testTypeHint": "HttpSpike"
+      }
+    },
+    {
+      "test_type": "ConnectionFlood",
+      "category": "DDOS_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "durationSec": 30,
+        "concurrentConnections": 20,
+        "rpsTarget": 100,
+        "httpMethod": "GET",
+        "requestPath": "/",
+        "customHeaders": {
+          "User-Agent": "TEO-FloodTest/1.0"
+        },
+        "testTypeHint": "ConnectionFlood"
+      }
+    },
+    {
+      "test_type": "TcpPortReachability", 
+      "category": "DDOS_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "port": 443,
+        "timeoutMs": 5000,
+        "testTypeHint": "TcpPortReachability"
+      }
+    },
+    {
+      "test_type": "UdpReachability",
+      "category": "DDOS_PROTECTION", 
+      "enabled": true,
+      "parameters": {
+        "port": 53,
+        "payloadList": ["test-payload"],
+        "timeoutMs": 5000,
+        "testTypeHint": "UdpReachability"
+      }
+    },
+    {
+      "test_type": "BasicConnectivity",
+      "category": "DDOS_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "httpMethod": "GET",
+        "requestPath": "/",
+        "timeoutMs": 10000,
+        "testTypeHint": "BasicConnectivity"
+      }
+    },
+    {
+      "test_type": "SqlInjection",
+      "category": "WEB_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "payloadList": [
+          "1' OR 1=1--",
+          "1' UNION SELECT NULL,NULL,NULL--",
+          "'; DROP TABLE users;--",
+          "1' AND (SELECT COUNT(*) FROM information_schema.tables)>0--"
+        ],
+        "encodingMode": "URL_ENCODE",
+        "injectionPoint": "QUERY_PARAM",
+        "httpMethod": "POST",
+        "requestPath": "/login",
+        "queryParams": {
+          "username": "{{PAYLOAD}}",
+          "password": "test"
+        },
+        "customHeaders": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "testTypeHint": "SqlInjection"
+      }
+    },
+    {
+      "test_type": "XssTest",
+      "category": "WEB_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "payloadList": [
+          "<script>alert('XSS')</script>",
+          "<img src=x onerror=alert('XSS')>",
+          "javascript:alert('XSS')",
+          "<svg onload=alert('XSS')>"
+        ],
+        "encodingMode": "URL_ENCODE",
+        "injectionPoint": "QUERY_PARAM",
+        "httpMethod": "GET",
+        "requestPath": "/search",
+        "queryParams": {
+          "q": "{{PAYLOAD}}"
+        },
+        "testTypeHint": "XssTest"
+      }
+    },
+    {
+      "test_type": "PathTraversal",
+      "category": "WEB_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "payloadList": [
+          "../../etc/passwd",
+          "..\\..\\..\\windows\\system32\\drivers\\etc\\hosts",
+          "....//....//....//etc/passwd",
+          "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+        ],
+        "injectionPoint": "PATH_PARAM",
+        "httpMethod": "GET",
+        "requestPath": "/download",
+        "queryParams": {
+          "file": "{{PAYLOAD}}"
+        },
+        "testTypeHint": "PathTraversal"
+      }
+    },
+    {
+      "test_type": "CommandInjection",
+      "category": "WEB_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "payloadList": [
+          "; cat /etc/passwd",
+          "| whoami",
+          "& dir",
+          "`id`"
+        ],
+        "encodingMode": "URL_ENCODE",
+        "injectionPoint": "BODY",
+        "httpMethod": "POST",
+        "requestPath": "/execute",
+        "bodyTemplate": "command={{PAYLOAD}}",
+        "testTypeHint": "CommandInjection"
+      }
+    },
+    {
+      "test_type": "CustomRulesValidation",
+      "category": "WEB_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "httpMethod": "GET",
+        "requestPath": "/api/test",
+        "headersOverrides": {
+          "X-Custom-Header": "malicious-value",
+          "X-Attack-Vector": "custom-rule-test"
+        },
+        "testTypeHint": "CustomRulesValidation"
+      }
+    },
+    {
+      "test_type": "EdgeRateLimiting",
+      "category": "WEB_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "rpsTarget": 200,
+        "windowSec": 60,
+        "burstMode": true,
+        "httpMethod": "GET",
+        "requestPath": "/api/limited",
+        "testTypeHint": "EdgeRateLimiting"
+      }
+    },
+    {
+      "test_type": "LongQuery",
+      "category": "WEB_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "paramLength": 8192,
+        "httpMethod": "GET",
+        "requestPath": "/search",
+        "queryParams": {
+          "data": "{{PAYLOAD}}"
+        },
+        "testTypeHint": "LongQuery"
+      }
+    },
+    {
+      "test_type": "OversizedBody",
+      "category": "WEB_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "bodySizeKb": 512,
+        "jsonFieldCount": 200,
+        "httpMethod": "POST",
+        "requestPath": "/api/upload",
+        "customHeaders": {
+          "Content-Type": "application/json"
+        },
+        "testTypeHint": "OversizedBody"
+      }
+    },
+    {
+      "test_type": "UserAgentAnomaly",
+      "category": "BOT_MANAGEMENT",
+      "enabled": true,
+      "parameters": {
+        "uaProfiles": [
+          "curl/7.68.0",
+          "python-requests/2.28.1",
+          "Googlebot/2.1",
+          "Mozilla/5.0 (compatible; bingbot/2.0)"
+        ],
+        "httpMethod": "GET",
+        "requestPath": "/",
+        "customHeaders": {
+          "User-Agent": "{{PAYLOAD}}"
+        },
+        "testTypeHint": "UserAgentAnomaly"
+      }
+    },
+    {
+      "test_type": "CookieJsChallenge",
+      "category": "BOT_MANAGEMENT",
+      "enabled": true,
+      "parameters": {
+        "cookiePolicy": "STRICT",
+        "jsRuntimeMode": "disabled",
+        "httpMethod": "GET",
+        "requestPath": "/protected",
+        "testTypeHint": "CookieJsChallenge"
+      }
+    },
+    {
+      "test_type": "WebCrawlerSimulation",
+      "category": "BOT_MANAGEMENT",
+      "enabled": true,
+      "parameters": {
+        "crawlDepth": 3,
+        "respectRobotsTxt": false,
+        "uaProfiles": ["Googlebot/2.1", "bingbot/2.0"],
+        "httpMethod": "GET",
+        "requestPath": "/",
+        "testTypeHint": "WebCrawlerSimulation"
+      }
+    },
+    {
+      "test_type": "AuthenticationTest",
+      "category": "API_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "authMode": "header",
+        "authToken": "Bearer test-token-123",
+        "apiEndpoint": "/api/v1/profile",
+        "httpMethod": "GET",
+        "testTypeHint": "AuthenticationTest"
+      }
+    },
+    {
+      "test_type": "BruteForce",
+      "category": "API_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "username": "admin",
+        "passwordList": [
+          "password",
+          "123456",
+          "admin",
+          "Password123!",
+          "guest",
+          "root"
+        ],
+        "requestDelayMs": 200,
+        "httpMethod": "POST",
+        "requestPath": "/api/login",
+        "testTypeHint": "BruteForce"
+      }
+    },
+    {
+      "test_type": "EnumerationIdor",
+      "category": "API_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "enumTemplate": "/api/user/{id}",
+        "idRange": [1, 100],
+        "stepSize": 1,
+        "httpMethod": "GET",
+        "testTypeHint": "EnumerationIdor"
+      }
+    },
+    {
+      "test_type": "SchemaInputValidation",
+      "category": "API_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "fuzzCases": [
+          "{}",
+          "{\"invalid\":\"json\",}",
+          "{\"number\":\"not_a_number\"}",
+          "{\"array\":[1,2,\"string\"]}"
+        ],
+        "contentTypes": ["application/json", "application/xml"],
+        "httpMethod": "POST",
+        "requestPath": "/api/validate",
+        "testTypeHint": "SchemaInputValidation"
+      }
+    },
+    {
+      "test_type": "BusinessLogicAbuse",
+      "category": "API_PROTECTION",
+      "enabled": true,
+      "parameters": {
+        "replayCount": 10,
+        "requestDelayMs": 100,
+        "httpMethod": "POST",
+        "requestPath": "/api/purchase",
+        "bodyTemplate": "{\"item_id\":1,\"quantity\":-1}",
+        "testTypeHint": "BusinessLogicAbuse"
+      }
+    }
+  ]
+}

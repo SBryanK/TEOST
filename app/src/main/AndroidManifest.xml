@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    
+    <!-- Network permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    
+    <!-- Storage: prefer SAF/MediaStore; legacy permissions removed for target 36 -->
+    
+    <!-- Foreground service for long-running tests -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    
+    <!-- Wake lock for keeping tests running -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    
+    <!-- Vibration for notifications -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name="com.example.teost.EdgeOneSecurityApp"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@drawable/teoc"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/teoc"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.EdgeOne.Splash"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true"
+        android:localeConfig="@xml/locales_config"
+        tools:targetApi="31">
+        
+        <!-- Disable WorkManager automatic initialization -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+        
+        <activity
+            android:name=".presentation.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.EdgeOne.Splash"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|keyboard">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            
+            <!-- Deep linking for test results -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="edgeone"
+                    android:host="test" />
+            </intent-filter>
+        </activity>
+
+        
+        
+        <activity
+            android:name=".presentation.DeepLinkReceiverActivity"
+            android:exported="true"
+            android:theme="@style/Theme.EdgeOne.Splash">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="edgeone" android:host="approve-token" />
+            </intent-filter>
+        </activity>
+        
+        <!-- Legacy SecurityTestService removed after migrating to WorkManager foreground -->
+
+        <receiver
+            android:name=".receiver.TestQueueReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.teost.ACTION_EXECUTE_TEST_QUEUE" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.SyncNowReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.example.teost.ACTION_SYNC_NOW" />
+            </intent-filter>
+        </receiver>
+        
+        
+        
+        <!-- WorkManager SystemForegroundService for security tests -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false" />
+        
+        <!-- File provider for sharing test results -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+</manifest>

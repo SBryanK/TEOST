@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Token credit requests
+    match /token_requests/{id} {
+      // Create: only authenticated user, and userId must match caller UID
+      allow create: if request.auth != null
+                    && request.resource.data.userId == request.auth.uid;
+
+      // Read own request(s)
+      allow get, list: if request.auth != null
+                        && resource.data.userId == request.auth.uid;
+
+      // Prevent client from modifying status/approvals; only Functions (Admin SDK) will update
+      allow update, delete: if false;
+    }
+
+    // User credits are written by Cloud Functions (Admin SDK bypasses rules),
+    // and readable by the owner
+    match /users/{uid}/meta/credits {
+      allow get: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    // Per-user history (synced by app CloudSyncWorker)
+    match /users/{uid}/history/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}
+
+

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "310519277933",
+    "project_id": "tencent-edgeone-security-test",
+    "storage_bucket": "tencent-edgeone-security-test.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:310519277933:android:473b85ed0ba3a69d65d264",
+        "android_client_info": {
+          "package_name": "com.example.teost"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTg-qoBVDnLRcENN8N2PTevQkN4FqSFn0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

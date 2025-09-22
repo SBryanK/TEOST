@@ -1,0 +1,30 @@
+{
+  "name": "edgeone-functions",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Firebase Cloud Functions for credit approval flow (email + token).",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p .",
+    "deploy": "firebase deploy --only functions",
+    "serve": "firebase emulators:start --only functions",
+    "clean": "rimraf dist"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
+    "cors": "^2.8.5",
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^4.8.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/node": "^20.11.30",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.6.2"
+  }
+}
+
+

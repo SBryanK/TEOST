@@ -1,0 +1,94 @@
+<resources>
+    <string name="app_name">TEO SecTest</string>
+    
+    <!-- Authentication -->
+    <string name="login_title">Welcome Back</string>
+    <string name="login_subtitle">Let us Start Testing!</string>
+    <string name="signup_title">Create Account</string>
+    <string name="email_hint">Email Address</string>
+    <string name="password_hint">Password</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="login_button">Login</string>
+    <string name="signup_button">Sign Up</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="already_have_account">Already have an account? Login</string>
+    <string name="dont_have_account">Do not have an account? Sign Up</string>
+    <string name="verify_email_title">Verify Your Email</string>
+    <string name="verify_email_message">We have sent a verification link to your email. Please check your inbox.</string>
+    <string name="resend_verification">Resend Verification Email</string>
+    <string name="verification_title">Verify your email</string>
+    <string name="verification_message">A verification link has been sent to your email. Please check your inbox.</string>
+    <string name="verification_resend_in">Resend in %1$ds</string>
+    <string name="email_verified_redirecting">Email verified! Redirecting…</string>
+    
+    <!-- Navigation -->
+    <string name="nav_search">Search</string>
+    <string name="nav_test">Test</string>
+    <string name="nav_history">History</string>
+    <string name="nav_profile">Profile</string>
+    <string name="http_code_chip">HTTP %1$d</string>
+    <string name="summary_ok">OK</string>
+    <string name="summary_rate_limit">Rate limited%1$s</string>
+    <string name="summary_waf">Blocked by WAF%1$s</string>
+    <string name="summary_bot">Challenge %1$s%2$s</string>
+    <string name="summary_geoip">Cannot access</string>
+    <string name="summary_network">Network mitigation detected%1$s</string>
+    <string name="summary_unknown">Unknown; check headers/logs</string>
+    <string name="iter_suffix"> at iteration %1$d</string>
+    
+    <!-- Search Screen -->
+    <string name="validate_connection">Validate Connection</string>
+    <string name="enter_domain_hint">Enter Domain/URL/IP</string>
+    <string name="test_connection">Test Connection</string>
+    <string name="go_to_tests">Go to Tests</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="headers">Headers</string>
+    <string name="raw_logs">Raw Logs</string>
+    <string name="export">Export</string>
+    <string name="back">Back</string>
+    
+    <!-- Test Categories -->
+    <string name="ddos_protection">DoS / Network Protection</string>
+    <string name="web_protection">Web Protection (WAF)</string>
+    <string name="bot_management">Bot Management</string>
+    <string name="coming_soon">Coming Soon!</string>
+    
+    <!-- Test Configuration -->
+    <string name="select_category">Select Category</string>
+    <string name="select_test_type">Select Test Type</string>
+    <string name="configure_test">Configure Test</string>
+    <string name="quick_add">Quick Add</string>
+    <string name="configure">Configure</string>
+    <string name="add_to_cart">Add to Cart</string>
+    <string name="simulate">Simulate</string>
+    <string name="credits_required">Credits Required: %1$d</string>
+    
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="user_credits">User Credits</string>
+    <string name="request_credits">Request Credits</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="help">Help</string>
+    <string name="favorites">Favorites</string>
+    <string name="logout">Log Out</string>
+    
+    <!-- History -->
+    <string name="test_history">Test History</string>
+    <string name="search_history">Search history...</string>
+    <string name="filter">Filter</string>
+    <string name="no_history">No test history found</string>
+    
+    <!-- Common -->
+    <string name="loading">Loading...</string>
+    <string name="error">Error</string>
+    <string name="success">Success</string>
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="copy">Copy</string>
+    <string name="share">Share</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+</resources>
