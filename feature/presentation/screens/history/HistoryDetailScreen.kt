@@ -173,6 +173,58 @@ fun HistoryDetailScreen(
                 }
             }}
 
+            // Network diagnosis logs (if present in TestResultDetails)
+            val networkLogs = viewModel.getDetails()?.networkLogs
+            if (!networkLogs.isNullOrEmpty()) {
+                ElevatedCard(shape = com.example.teost.core.ui.theme.CardShape) {
+                    Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        var networkLogsExpanded by rememberSaveable { mutableStateOf(false) }
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("Network Diagnosis", style = MaterialTheme.typography.titleMedium)
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                val ctx = LocalContext.current
+                                TextButton(onClick = {
+                                    try {
+                                        val cm = ctx.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                        cm.setPrimaryClip(android.content.ClipData.newPlainText("network_logs", networkLogs.joinToString("\n")))
+                                        Toast.makeText(ctx, com.example.teost.core.ui.R.string.copied_to_clipboard, Toast.LENGTH_SHORT).show()
+                                    } catch (_: Exception) {}
+                                }) { Text(androidx.compose.ui.res.stringResource(id = com.example.teost.core.ui.R.string.copy)) }
+                                TextButton(onClick = { networkLogsExpanded = !networkLogsExpanded }) {
+                                    Text(if (networkLogsExpanded) "Collapse" else "Expand")
+                                }
+                            }
+                        }
+                        val shown = if (networkLogsExpanded) networkLogs else networkLogs.take(5)
+                        val scroll = rememberScrollState()
+                        Column(Modifier.fillMaxWidth().heightIn(max = if (networkLogsExpanded) 300.dp else 160.dp).verticalScroll(scroll), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            shown.forEach { line ->
+                                val isError = line.contains("FAIL", ignoreCase = true) || line.contains("ERROR", ignoreCase = true)
+                                val statusMatch = Regex("\\b(HTTP \\d{3}|-> \\d{3})\\b").find(line)
+                                val statusColor = when (statusMatch?.value?.takeLast(3)?.toIntOrNull()) {
+                                    in 200..299 -> Color(0xFF2E7D32)
+                                    in 300..399 -> Color(0xFF0277BD)
+                                    in 400..499 -> Color(0xFFF9A825)
+                                    in 500..599 -> Color(0xFFC62828)
+                                    else -> MaterialTheme.colorScheme.onSurface
+                                }
+                                Surface(color = if (isError) Color(0xFFFFEBEE) else MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(6.dp)) {
+                                    Text(
+                                        text = line,
+                                        color = if (isError) Color(0xFFC62828) else statusColor,
+                                        fontFamily = FontFamily.Monospace,
+                                        modifier = Modifier.fillMaxWidth().padding(6.dp)
+                                    )
+                                }
+                            }
+                            if (!networkLogsExpanded && networkLogs.size > shown.size) {
+                                Text("… ${networkLogs.size - shown.size} more lines", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            }
+
             // Per-request logs (if present in rawLogs)
             val logs = viewModel.getRawLogs()
             if (!logs.isNullOrBlank()) {

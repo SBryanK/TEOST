@@ -228,6 +228,7 @@ class SecurityTestEngine @Inject constructor(
         val params = config.parameters
         val results = mutableListOf<Long>()
         val errors = mutableListOf<String>()
+        val networkLogs = mutableListOf<String>()
         val startTime = System.currentTimeMillis()
         if (params.burstRequests != null) {
             val burstSize = params.burstRequests
@@ -246,11 +247,16 @@ class SecurityTestEngine @Inject constructor(
                             )
                             val requestTime = System.currentTimeMillis() - requestStart
                             results.add(requestTime)
+                            
+                            // ✅ ADD NETWORK DIAGNOSIS LOG
+                            networkLogs.add("${System.currentTimeMillis()}: ${params.httpMethod?.name ?: "GET"} ${buildTestUrl(config.domain, params.requestPath ?: params.targetPath, params.queryParams)} -> HTTP ${response.code} (DNS: ${tm.dnsMs}ms, TCP: ${tm.tcpMs}ms, SSL: ${tm.sslMs}ms, TTFB: ${tm.ttfbMs}ms)")
+                            
                             if (!response.isSuccessful) errors.add("Request $requestIndex: HTTP ${response.code}")
                             response.close()
                             delay(interval.toLong().coerceAtLeast(appConfig.minBurstIntervalMs))
                         } catch (e: Exception) {
                             errors.add("Request $requestIndex: ${e.message}")
+                            networkLogs.add("${System.currentTimeMillis()}: ERROR - Request $requestIndex: ${e.message}")
                         }
                     }
                 }
@@ -285,6 +291,7 @@ class SecurityTestEngine @Inject constructor(
                 latencyP95 = p95Latency,
                 totalRequests = totalRequests,
                 failedRequests = errorCount,
+                networkLogs = networkLogs, // ✅ ADD NETWORK LOGS
                 paramsSnapshot = config.parameters
             ),
             rawLogs = buildTestLogs(results, errors),
@@ -433,6 +440,7 @@ class SecurityTestEngine @Inject constructor(
         val endAt = System.currentTimeMillis() + durationSec * 1000L
         val results = mutableListOf<Long>()
         val errors = mutableListOf<String>()
+        val networkLogs = mutableListOf<String>()
         val startTime = System.currentTimeMillis()
         val jobs = List(concurrency.coerceAtMost(appConfig.maxConcurrentConnections)) {
             async {
@@ -440,7 +448,7 @@ class SecurityTestEngine @Inject constructor(
                 while (System.currentTimeMillis() < endAt) {
                     try {
                         val requestStart = System.currentTimeMillis()
-                        val (response, _) = requestWithTimings(
+                        val (response, tm) = requestWithTimings(
                             url = buildTestUrl(config.domain, params.requestPath ?: params.targetPath, params.queryParams),
                             method = params.httpMethod ?: HttpMethod.GET,
                             headers = params.customHeaders ?: emptyMap(),
@@ -448,10 +456,15 @@ class SecurityTestEngine @Inject constructor(
                         )
                         val requestTime = System.currentTimeMillis() - requestStart
                         results.add(requestTime)
+                        
+                        // ✅ ADD NETWORK DIAGNOSIS LOG
+                        networkLogs.add("${System.currentTimeMillis()}: ${params.httpMethod?.name ?: "GET"} ${buildTestUrl(config.domain, params.requestPath ?: params.targetPath, params.queryParams)} -> HTTP ${response.code} (DNS: ${tm.dnsMs}ms, TCP: ${tm.tcpMs}ms, SSL: ${tm.sslMs}ms, TTFB: ${tm.ttfbMs}ms)")
+                        
                         if (!response.isSuccessful) errors.add("Request $i: HTTP ${response.code}")
                         response.close()
                     } catch (e: Exception) {
                         errors.add("Request $i: ${e.message}")
+                        networkLogs.add("${System.currentTimeMillis()}: ERROR - Request $i: ${e.message}")
                     }
                     i++
                     delay(intervalMs.coerceAtLeast(appConfig.minBurstIntervalMs))
@@ -487,6 +500,7 @@ class SecurityTestEngine @Inject constructor(
                 latencyP95 = p95Latency,
                 totalRequests = totalRequests,
                 failedRequests = errorCount,
+                networkLogs = networkLogs, // ✅ ADD NETWORK LOGS
                 paramsSnapshot = config.parameters
             ),
             rawLogs = buildTestLogs(results, errors),
