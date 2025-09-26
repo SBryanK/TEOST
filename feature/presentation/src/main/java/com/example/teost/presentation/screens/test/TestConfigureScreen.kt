@@ -52,6 +52,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.size
 import kotlinx.coroutines.withContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -98,7 +99,6 @@ private fun getTestTypeDisplayName(testType: String): String {
         "PathTraversal" -> "Path Traversal Test"
         "CommandInjection" -> "Command Injection Test"
         "ReflectedXss" -> "Reflected XSS Test"
-        "CustomRulesValidation" -> "Custom WAF Rules Test"
         "Log4ShellProbe" -> "Log4Shell Probe Test"
         "EdgeRateLimiting" -> "Rate Limiting Test"
         "LongQuery" -> "Long Query Test"
@@ -113,7 +113,6 @@ private fun getTestTypeDisplayName(testType: String): String {
         
         // Bot Management Tests
         "UserAgentAnomaly" -> "User-Agent Anomaly Test"
-        "CookieJsChallenge" -> "Cookie/JS Challenge Test"
         "WebCrawlerSimulation" -> "Web Crawler Test"
         
         // Default fallback
@@ -504,25 +503,51 @@ fun TestConfigureScreen(
                     )
                 }
                 
-                // Other WAF tests with minimal customization
-                "ReflectedXss", "CustomRulesValidation", "Log4ShellProbe" -> {
+                "ReflectedXss" -> {
                     HttpRequestEditor(
-                        httpMethod = state.params.httpMethod ?: HttpMethod.POST,
+                        httpMethod = state.params.httpMethod ?: HttpMethod.GET,
                         onMethodChange = { configVm.updateParams(state.params.copy(httpMethod = it)) },
-                        requestPath = state.params.requestPath ?: "/",
+                        requestPath = state.params.requestPath ?: "/search",
                         onPathChange = { configVm.updateParams(state.params.copy(requestPath = it)) },
-                        queryParams = state.params.queryParams ?: mapOf("param" to "{{PAYLOAD}}"),
+                        queryParams = state.params.queryParams ?: mapOf("q" to "{{PAYLOAD}}", "page" to "1"),
                         onQueryParamsChange = { configVm.updateParams(state.params.copy(queryParams = it)) },
-                        headers = state.params.customHeaders ?: mapOf("Content-Type" to "application/x-www-form-urlencoded"),
+                        headers = state.params.customHeaders ?: mapOf(
+                            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                            "Referer" to "https://trusted-site.com"
+                        ),
                         onHeadersChange = { configVm.updateParams(state.params.copy(customHeaders = it)) },
-                        bodyTemplate = state.params.bodyTemplate ?: "data={{PAYLOAD}}",
+                        bodyTemplate = state.params.bodyTemplate ?: "",
                         onBodyChange = { configVm.updateParams(state.params.copy(bodyTemplate = it)) },
                         showMethod = true,
                         showPath = true,
                         showQueryParams = true,
                         showHeaders = true,
                         showBody = true,
-                        title = "WAF Testing Parameters"
+                        title = "Reflected XSS Testing Parameters"
+                    )
+                }
+                "Log4ShellProbe" -> {
+                    HttpRequestEditor(
+                        httpMethod = state.params.httpMethod ?: HttpMethod.POST,
+                        onMethodChange = { configVm.updateParams(state.params.copy(httpMethod = it)) },
+                        requestPath = state.params.requestPath ?: "/login",
+                        onPathChange = { configVm.updateParams(state.params.copy(requestPath = it)) },
+                        queryParams = state.params.queryParams ?: mapOf("user" to "{{PAYLOAD}}", "pass" to "test"),
+                        onQueryParamsChange = { configVm.updateParams(state.params.copy(queryParams = it)) },
+                        headers = state.params.customHeaders ?: mapOf(
+                            "Content-Type" to "application/x-www-form-urlencoded",
+                            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                            "X-Forwarded-For" to "192.168.1.100"
+                        ),
+                        onHeadersChange = { configVm.updateParams(state.params.copy(customHeaders = it)) },
+                        bodyTemplate = state.params.bodyTemplate ?: "username={{PAYLOAD}}&password=test123",
+                        onBodyChange = { configVm.updateParams(state.params.copy(bodyTemplate = it)) },
+                        showMethod = true,
+                        showPath = true,
+                        showQueryParams = true,
+                        showHeaders = true,
+                        showBody = true,
+                        title = "Log4Shell Probe Testing Parameters"
                     )
                 }
                 
@@ -665,10 +690,14 @@ fun TestConfigureScreen(
                     // ✅ BUSINESS LOGIC SPECIFIC PARAMETERS
                     // Replay Count - How many times to repeat
                     OutlinedTextField(
-                        value = (state.params.replayCount ?: 10).toString(),
+                        value = state.params.replayCount?.toString() ?: "",
                         onValueChange = { value ->
-                            value.toIntOrNull()?.let { count ->
-                                configVm.updateParams(state.params.copy(replayCount = count.coerceIn(1, 1000)))
+                            if (value.isEmpty()) {
+                                configVm.updateParams(state.params.copy(replayCount = null))
+                            } else {
+                                value.toIntOrNull()?.let { count ->
+                                    configVm.updateParams(state.params.copy(replayCount = count.coerceIn(1, 1000)))
+                                }
                             }
                         },
                         label = { Text("Replay Count") },
@@ -679,10 +708,14 @@ fun TestConfigureScreen(
                     
                     // Request Delay - Timing between replays
                     OutlinedTextField(
-                        value = (state.params.requestDelayMs ?: 100).toString(),
+                        value = state.params.requestDelayMs?.toString() ?: "",
                         onValueChange = { value ->
-                            value.toIntOrNull()?.let { delay ->
-                                configVm.updateParams(state.params.copy(requestDelayMs = delay.coerceIn(0, 10000)))
+                            if (value.isEmpty()) {
+                                configVm.updateParams(state.params.copy(requestDelayMs = null))
+                            } else {
+                                value.toIntOrNull()?.let { delay ->
+                                    configVm.updateParams(state.params.copy(requestDelayMs = delay.coerceIn(0, 10000)))
+                                }
                             }
                         },
                         label = { Text("Request Delay (ms)") },
@@ -698,26 +731,6 @@ fun TestConfigureScreen(
                         label = { Text("Business Logic Endpoint") },
                         supportingText = { Text("API endpoint with business logic to abuse") },
                         modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                "CustomRulesValidation" -> {
-                    HttpRequestEditor(
-                        httpMethod = state.params.httpMethod ?: HttpMethod.POST,
-                        onMethodChange = { configVm.updateParams(state.params.copy(httpMethod = it)) },
-                        requestPath = state.params.apiEndpoint ?: "/api/data",
-                        onPathChange = { configVm.updateParams(state.params.copy(apiEndpoint = it)) },
-                        queryParams = state.params.queryParams ?: mapOf("type" to "test"),
-                        onQueryParamsChange = { configVm.updateParams(state.params.copy(queryParams = it)) },
-                        headers = state.params.customHeaders ?: mapOf("Content-Type" to "application/json"),
-                        onHeadersChange = { configVm.updateParams(state.params.copy(customHeaders = it)) },
-                        bodyTemplate = state.params.bodyTemplate ?: "{\"data\": \"{{PAYLOAD}}\", \"type\": \"test\"}",
-                        onBodyChange = { configVm.updateParams(state.params.copy(bodyTemplate = it)) },
-                        showMethod = true,
-                        showPath = true,
-                        showQueryParams = true,
-                        showHeaders = true,
-                        showBody = true,
-                        title = "API Testing Parameters"
                     )
                 }
                 
@@ -743,29 +756,6 @@ fun TestConfigureScreen(
                     )
                 }
                 
-                "CookieJsChallenge" -> {
-                    HttpRequestEditor(
-                        httpMethod = HttpMethod.GET,
-                        onMethodChange = { },
-                        requestPath = "/",
-                        onPathChange = { },
-                        queryParams = emptyMap(),
-                        onQueryParamsChange = { },
-                        headers = state.params.customHeaders ?: mapOf(
-                            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                            "Cookie" to "challenge={{PAYLOAD}}; session=test"
-                        ),
-                        onHeadersChange = { configVm.updateParams(state.params.copy(customHeaders = it)) },
-                        bodyTemplate = null,
-                        onBodyChange = { },
-                        showMethod = false,
-                        showPath = false,
-                        showQueryParams = false,
-                        showHeaders = true,
-                        showBody = false,
-                        title = "Cookie/JS Challenge Parameters"
-                    )
-                }
                 
                 "WebCrawlerSimulation" -> {
                     HttpRequestEditor(
@@ -826,10 +816,14 @@ fun TestConfigureScreen(
                         
                         // Duration Configuration - CRITICAL PARAMETER
                         OutlinedTextField(
-                            value = (state.params.durationSec ?: 10).toString(),
+                            value = state.params.durationSec?.toString() ?: "",
                             onValueChange = { value ->
-                                value.toIntOrNull()?.let { duration ->
-                                    configVm.updateParams(state.params.copy(durationSec = duration.coerceIn(5, 300)))
+                                if (value.isEmpty()) {
+                                    configVm.updateParams(state.params.copy(durationSec = null))
+                                } else {
+                                    value.toIntOrNull()?.let { duration ->
+                                        configVm.updateParams(state.params.copy(durationSec = duration.coerceIn(5, 300)))
+                                    }
                                 }
                             },
                             label = { Text("Test Duration (seconds)") },
@@ -840,10 +834,14 @@ fun TestConfigureScreen(
                         
                         // Concurrent Connections - CRITICAL PARAMETER  
                         OutlinedTextField(
-                            value = (state.params.concurrentConnections ?: 10).toString(),
+                            value = state.params.concurrentConnections?.toString() ?: "",
                             onValueChange = { value ->
-                                value.toIntOrNull()?.let { connections ->
-                                    configVm.updateParams(state.params.copy(concurrentConnections = connections.coerceIn(1, 100)))
+                                if (value.isEmpty()) {
+                                    configVm.updateParams(state.params.copy(concurrentConnections = null))
+                                } else {
+                                    value.toIntOrNull()?.let { connections ->
+                                        configVm.updateParams(state.params.copy(concurrentConnections = connections.coerceIn(1, 100)))
+                                    }
                                 }
                             },
                             label = { Text("Concurrent Connections") },
@@ -854,10 +852,14 @@ fun TestConfigureScreen(
                         
                         // RPS Target - OPTIONAL PARAMETER
                         OutlinedTextField(
-                            value = (state.params.rpsTarget ?: 50).toString(),
+                            value = state.params.rpsTarget?.toString() ?: "",
                             onValueChange = { value ->
-                                value.toIntOrNull()?.let { rps ->
-                                    configVm.updateParams(state.params.copy(rpsTarget = rps.coerceIn(1, 1000)))
+                                if (value.isEmpty()) {
+                                    configVm.updateParams(state.params.copy(rpsTarget = null))
+                                } else {
+                                    value.toIntOrNull()?.let { rps ->
+                                        configVm.updateParams(state.params.copy(rpsTarget = rps.coerceIn(1, 1000)))
+                                    }
                                 }
                             },
                             label = { Text("Requests Per Second (RPS)") },
@@ -970,10 +972,14 @@ fun TestConfigureScreen(
                         
                         // Body Size - CRITICAL PARAMETER
                         OutlinedTextField(
-                            value = (state.params.bodySizeKb ?: 256).toString(),
+                            value = state.params.bodySizeKb?.toString() ?: "",
                             onValueChange = { value ->
-                                value.toIntOrNull()?.let { sizeKb ->
-                                    configVm.updateParams(state.params.copy(bodySizeKb = sizeKb.coerceIn(1, 10240)))
+                                if (value.isEmpty()) {
+                                    configVm.updateParams(state.params.copy(bodySizeKb = null))
+                                } else {
+                                    value.toIntOrNull()?.let { sizeKb ->
+                                        configVm.updateParams(state.params.copy(bodySizeKb = sizeKb.coerceIn(1, 10240)))
+                                    }
                                 }
                             },
                             label = { Text("Body Size (KB)") },
@@ -984,10 +990,14 @@ fun TestConfigureScreen(
                         
                         // JSON Field Count - CRITICAL PARAMETER
                         OutlinedTextField(
-                            value = (state.params.jsonFieldCount ?: 100).toString(),
+                            value = state.params.jsonFieldCount?.toString() ?: "",
                             onValueChange = { value ->
-                                value.toIntOrNull()?.let { fieldCount ->
-                                    configVm.updateParams(state.params.copy(jsonFieldCount = fieldCount.coerceIn(1, 1000)))
+                                if (value.isEmpty()) {
+                                    configVm.updateParams(state.params.copy(jsonFieldCount = null))
+                                } else {
+                                    value.toIntOrNull()?.let { fieldCount ->
+                                        configVm.updateParams(state.params.copy(jsonFieldCount = fieldCount.coerceIn(1, 1000)))
+                                    }
                                 }
                             },
                             label = { Text("JSON Field Count") },
@@ -1259,10 +1269,14 @@ fun TestConfigureScreen(
                     
                     // Request Delay - Anti-detection
                     OutlinedTextField(
-                        value = (state.params.requestDelayMs ?: 200).toString(),
+                        value = state.params.requestDelayMs?.toString() ?: "",
                         onValueChange = { value ->
-                            value.toIntOrNull()?.let { delay ->
-                                configVm.updateParams(state.params.copy(requestDelayMs = delay.coerceIn(0, 10000)))
+                            if (value.isEmpty()) {
+                                configVm.updateParams(state.params.copy(requestDelayMs = null))
+                            } else {
+                                value.toIntOrNull()?.let { delay ->
+                                    configVm.updateParams(state.params.copy(requestDelayMs = delay.coerceIn(0, 10000)))
+                                }
                             }
                         },
                         label = { Text("Request Delay (ms)") },
@@ -1286,10 +1300,14 @@ fun TestConfigureScreen(
                     
                     // ✅ BURST REQUESTS - Primary parameter (was missing!)
                     OutlinedTextField(
-                        value = (state.params.burstRequests ?: 100).toString(),
+                        value = state.params.burstRequests?.toString() ?: "",
                         onValueChange = { value ->
-                            value.toIntOrNull()?.let { requests ->
-                                configVm.updateParams(state.params.copy(burstRequests = requests.coerceIn(10, 1000)))
+                            if (value.isEmpty()) {
+                                configVm.updateParams(state.params.copy(burstRequests = null))
+                            } else {
+                                value.toIntOrNull()?.let { requests ->
+                                    configVm.updateParams(state.params.copy(burstRequests = requests.coerceIn(10, 1000)))
+                                }
                             }
                         },
                         label = { Text("Burst Requests") },
@@ -1332,10 +1350,10 @@ fun TestConfigureScreen(
                     
                     // ✅ DURATION - Maximum test duration (FLEXIBLE INPUT)
                     OutlinedTextField(
-                        value = (state.params.durationSec ?: 60).toString(),
+                        value = state.params.durationSec?.toString() ?: "",
                         onValueChange = { value ->
                             if (value.isEmpty()) {
-                                configVm.updateParams(state.params.copy(durationSec = 60))
+                                configVm.updateParams(state.params.copy(durationSec = null))
                             } else {
                                 value.toIntOrNull()?.let { duration ->
                                     configVm.updateParams(state.params.copy(durationSec = duration.coerceIn(5, 600)))
@@ -1368,10 +1386,10 @@ fun TestConfigureScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
-                        value = (state.params.durationSec ?: 30).toString(),
+                        value = state.params.durationSec?.toString() ?: "",
                         onValueChange = { value ->
                             if (value.isEmpty()) {
-                                configVm.updateParams(state.params.copy(durationSec = 30))
+                                configVm.updateParams(state.params.copy(durationSec = null))
                             } else {
                                 value.toIntOrNull()?.let { duration ->
                                     configVm.updateParams(state.params.copy(durationSec = duration.coerceIn(5, 300)))
@@ -1410,31 +1428,65 @@ fun TestConfigureScreen(
                 }
             }
 
-            // Validation errors display
+            // Enhanced validation display
             val validationErrors = configVm.validateCurrentParams()
-            if (validationErrors.isNotEmpty()) {
+            val domainError = configVm.validateDomain()
+            
+            if (validationErrors.isNotEmpty() || domainError != null) {
                 HorizontalDivider()
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Configuration Issues:",
-                            style = MaterialTheme.typography.titleSmall,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        validationErrors.forEach { error ->
+                
+                // Domain validation errors
+                domainError?.let { error ->
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Text(
-                                text = "• $error",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer
+                                text = "⚠️",
+                                fontSize = 20.sp
+                            )
+                            
+                            Spacer(modifier = Modifier.width(8.dp))
+                            
+                            Text(
+                                text = "Domain: $error",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }
                 }
+                
+                // Parameter validation errors
+                if (validationErrors.isNotEmpty()) {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Configuration Issues:",
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            validationErrors.forEach { error ->
+                                Text(
+                                    text = "• $error",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            }
+                        }
+                    }
+                }
+                
             }
 
             HorizontalDivider(modifier = Modifier.padding(top = 8.dp))

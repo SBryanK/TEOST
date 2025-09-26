@@ -80,8 +80,8 @@ fun TestTypeScreen(
     }
     val testTypes = when (category) {
         "DDOS_PROTECTION" -> listOf("HttpSpike", "ConnectionFlood")
-        "WEB_PROTECTION" -> listOf("SqlInjection", "XssTest", "PathTraversal", "CustomRulesValidation", "OversizedBody")
-        "BOT_MANAGEMENT" -> listOf("UserAgentAnomaly", "CookieJsChallenge", "WebCrawlerSimulation")
+        "WEB_PROTECTION" -> listOf("SqlInjection", "XssTest", "PathTraversal", "OversizedBody")
+        "BOT_MANAGEMENT" -> listOf("UserAgentAnomaly", "WebCrawlerSimulation")
         "API_PROTECTION" -> listOf("BruteForce", "EnumerationIdor", "SchemaInputValidation", "BusinessLogicAbuse")
         else -> emptyList()
     }
@@ -259,7 +259,6 @@ private fun getTestTypeDisplayName(testType: String): String {
         "PathTraversal" -> "Path Traversal Test"
         "CommandInjection" -> "Command Injection Test"
         "ReflectedXss" -> "Reflected XSS Test"
-        "CustomRulesValidation" -> "Custom WAF Rules Test"
         "Log4ShellProbe" -> "Log4Shell Probe Test"
         "LongQuery" -> "Long Query Test"
         "OversizedBody" -> "Oversized Body Test"
@@ -273,7 +272,6 @@ private fun getTestTypeDisplayName(testType: String): String {
         
         // Bot Management Tests
         "UserAgentAnomaly" -> "User-Agent Anomaly Test"
-        "CookieJsChallenge" -> "Cookie/JS Challenge Test"
         "WebCrawlerSimulation" -> "Web Crawler Test"
         
         // Default fallback

@@ -346,14 +346,8 @@ fun MainScreen(
                             navController.navigate(Screen.TestFlow.Cart.route)
                         },
                         onNavigateBack = { 
-                            val lastScreen = flowVm.popFromNavigationStack()
-                            // Always go back to TypeSelect for the current category
-                            val route = Screen.TestFlow.TypeSelect.route
-                                .replace("{category}", category)
-                                .let { r -> if (target.isNullOrBlank()) r.replace("?target={target}", "") else r.replace("{target}", target) }
-                            navController.navigate(route) {
-                                popUpTo(Screen.TestFlow.Configure.route) { inclusive = true }
-                            }
+                            // Always go back to previous screen in navigation stack
+                            navController.popBackStack()
                         }
                     )
                 }
@@ -370,28 +364,8 @@ fun MainScreen(
                             navController.navigate(Screen.TestFlow.Confirmation.route) 
                         },
                         onNavigateBack = { 
-                            val lastScreen = flowVm.popFromNavigationStack()
-                            when (lastScreen) {
-                                "Configure" -> {
-                                    // Go back to last configuration
-                                    val category = flowVm.selectedCategory.value ?: "ddos_protection"
-                                    val type = flowVm.selectedType.value ?: "httpspike"
-                                    val target = flowVm.target.value ?: ""
-                                    val route = Screen.TestFlow.Configure.route
-                                        .replace("{category}", category)
-                                        .replace("{type}", type)
-                                        .replace("{target}", target)
-                                    navController.navigate(route) {
-                                        popUpTo(Screen.TestFlow.Cart.route) { inclusive = true }
-                                    }
-                                }
-                                "TypeSelect" -> {
-                                    navController.popBackStack(Screen.TestFlow.TypeSelect.route, false)
-                                }
-                                else -> {
-                                    navController.popBackStack(Screen.TestFlow.CategorySelect.route, false)
-                                }
-                            }
+                            // Always go back to previous screen in navigation stack
+                            navController.popBackStack()
                         },
                         onNavigateToConfiguration = { category, type, target ->
                             flowVm.pushToNavigationStack("Configure")

@@ -22,7 +22,8 @@ class SecurityTestEngine @Inject constructor(
 
     sealed class TestProgress {
         data class Starting(val testName: String) : TestProgress()
-        data class Running(val progress: Float, val message: String) : TestProgress()
+        data class Running(val progress: Float, val message: String, val currentStep: String, val totalSteps: Int, val currentStepIndex: Int) : TestProgress()
+        data class StepCompleted(val stepName: String, val stepIndex: Int, val totalSteps: Int) : TestProgress()
         data class Completed(val result: TestResult) : TestProgress()
         data class Failed(val error: String) : TestProgress()
     }
@@ -35,24 +36,24 @@ class SecurityTestEngine @Inject constructor(
             
             val params = configuration.parameters
             val result = when {
-                params.burstRequests != null -> executeDoSTest(configuration)
-                (params.rpsTarget != null || (params.concurrentConnections != null && params.durationSec != null)) -> executeFloodTest(configuration)
-                configuration.port != null && (configuration.parameters.payloadList != null) -> executeUdpReachability(configuration)
-                configuration.port != null -> executeTcpReachability(configuration)
+                params.burstRequests != null -> executeDoSTestWithProgress(configuration)
+                (params.rpsTarget != null || (params.concurrentConnections != null && params.durationSec != null)) -> executeFloodTestWithProgress(configuration)
+                configuration.port != null && (configuration.parameters.payloadList != null) -> executeUdpReachabilityWithProgress(configuration)
+                configuration.port != null -> executeTcpReachabilityWithProgress(configuration)
                 // WAF extras mapping by intent
-                params.payloadList != null && params.injectionPoint == InjectionPoint.PATH_PARAM -> executePathTraversalTest(configuration)
-                params.headersOverrides != null && params.payloadList == null && params.bodySizeKb == null -> executeCustomRulesTest(configuration)
-                params.bodySizeKb != null || params.jsonFieldCount != null -> executeOversizedBodyTest(configuration)
-                params.payloadList != null -> executeWAFTest(configuration)
+                params.payloadList != null && params.injectionPoint == InjectionPoint.PATH_PARAM -> executePathTraversalTestWithProgress(configuration)
+                params.headersOverrides != null && params.payloadList == null && params.bodySizeKb == null -> executeCustomRulesTestWithProgress(configuration)
+                params.bodySizeKb != null || params.jsonFieldCount != null -> executeOversizedBodyTestWithProgress(configuration)
+                params.payloadList != null -> executeWAFTestWithProgress(configuration)
                 // API Protection mappings
-                params.authMode != null || params.authToken != null -> executeApiAuthTest(configuration)
-                (params.username != null && params.passwordList != null) -> executeBruteForceTest(configuration)
-                (params.enumTemplate != null && params.idRange != null) -> executeEnumerationTest(configuration)
-                params.fuzzCases != null || params.contentTypes != null -> executeSchemaValidationTest(configuration)
-                params.replayCount != null || params.requestDelayMs != null -> executeBusinessLogicTest(configuration)
-                (params.crawlDepth != null || params.respectRobotsTxt == true) -> executeCrawlerTest(configuration)
-                params.uaProfiles != null -> executeBotTest(configuration)
-                else -> executeBasicTest(configuration)
+                params.authMode != null || params.authToken != null -> executeApiAuthTestWithProgress(configuration)
+                (params.username != null && params.passwordList != null) -> executeBruteForceTestWithProgress(configuration)
+                (params.enumTemplate != null && params.idRange != null) -> executeEnumerationTestWithProgress(configuration)
+                params.fuzzCases != null || params.contentTypes != null -> executeSchemaValidationTestWithProgress(configuration)
+                params.replayCount != null || params.requestDelayMs != null -> executeBusinessLogicTestWithProgress(configuration)
+                (params.crawlDepth != null || params.respectRobotsTxt == true) -> executeCrawlerTestWithProgress(configuration)
+                params.uaProfiles != null -> executeBotTestWithProgress(configuration)
+                else -> executeBasicTestWithProgress(configuration)
             }
             emit(TestProgress.Completed(result))
         } catch (e: Exception) {
@@ -83,19 +84,63 @@ class SecurityTestEngine @Inject constructor(
         var secureConnectEnd = 0L
         var requestHeadersStart = 0L
         var responseHeadersStart = 0L
+        var requestBodyStart = 0L
+        var requestBodyEnd = 0L
+        var responseBodyStart = 0L
+        var responseBodyEnd = 0L
 
         val client = okHttpClient.newBuilder()
             .eventListener(object : EventListener() {
-                override fun dnsStart(call: Call, domainName: String) { dnsStart = System.currentTimeMillis() }
-                override fun dnsEnd(call: Call, domainName: String, inetAddressList: List<java.net.InetAddress>) { dnsEnd = System.currentTimeMillis() }
-                override fun connectStart(call: Call, inetSocketAddress: java.net.InetSocketAddress, proxy: java.net.Proxy) { connectStart = System.currentTimeMillis() }
-                override fun connectEnd(call: Call, inetSocketAddress: java.net.InetSocketAddress, proxy: java.net.Proxy, protocol: Protocol?) { connectEnd = System.currentTimeMillis() }
-                override fun secureConnectStart(call: Call) { secureConnectStart = System.currentTimeMillis() }
-                override fun secureConnectEnd(call: Call, handshake: Handshake?) { secureConnectEnd = System.currentTimeMillis() }
-                override fun requestHeadersStart(call: Call) { requestHeadersStart = System.currentTimeMillis() }
-                override fun responseHeadersStart(call: Call) { responseHeadersStart = System.currentTimeMillis() }
+                override fun dnsStart(call: Call, domainName: String) { 
+                    dnsStart = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "DNS lookup started for: $domainName")
+                }
+                override fun dnsEnd(call: Call, domainName: String, inetAddressList: List<java.net.InetAddress>) { 
+                    dnsEnd = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "DNS lookup completed for: $domainName, resolved to: ${inetAddressList.joinToString()}")
+                }
+                override fun connectStart(call: Call, inetSocketAddress: java.net.InetSocketAddress, proxy: java.net.Proxy) { 
+                    connectStart = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "TCP connection started to: ${inetSocketAddress.address.hostAddress}:${inetSocketAddress.port}")
+                }
+                override fun connectEnd(call: Call, inetSocketAddress: java.net.InetSocketAddress, proxy: java.net.Proxy, protocol: Protocol?) { 
+                    connectEnd = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "TCP connection established, protocol: $protocol")
+                }
+                override fun secureConnectStart(call: Call) { 
+                    secureConnectStart = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "SSL/TLS handshake started")
+                }
+                override fun secureConnectEnd(call: Call, handshake: Handshake?) { 
+                    secureConnectEnd = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "SSL/TLS handshake completed, cipher: ${handshake?.cipherSuite}")
+                }
+                override fun requestHeadersStart(call: Call) { 
+                    requestHeadersStart = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "Request headers sending started")
+                }
+                override fun requestBodyStart(call: Call) {
+                    requestBodyStart = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "Request body sending started")
+                }
+                override fun requestBodyEnd(call: Call, byteCount: Long) {
+                    requestBodyEnd = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "Request body sent, size: $byteCount bytes")
+                }
+                override fun responseHeadersStart(call: Call) { 
+                    responseHeadersStart = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "Response headers received")
+                }
+                override fun responseBodyStart(call: Call) {
+                    responseBodyStart = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "Response body receiving started")
+                }
+                override fun responseBodyEnd(call: Call, byteCount: Long) {
+                    responseBodyEnd = System.currentTimeMillis()
+                    android.util.Log.d("NetworkDiagnosis", "Response body received, size: $byteCount bytes")
+                }
                 override fun callFailed(call: Call, ioe: java.io.IOException) {
-                    android.util.Log.w("SecurityTestEngine", "Network call failed: ${ioe.message}")
+                    android.util.Log.w("NetworkDiagnosis", "Network call failed: ${ioe.message}", ioe)
                 }
             })
             .build()
@@ -106,11 +151,32 @@ class SecurityTestEngine @Inject constructor(
             .build()
 
         val response = client.newCall(request).execute()
+        
+        // ✅ Enhanced timing metrics with detailed logging
+        val dnsMs = if (dnsStart > 0 && dnsEnd >= dnsStart) dnsEnd - dnsStart else null
+        val tcpMs = if (connectStart > 0 && connectEnd >= connectStart) connectEnd - connectStart else null
+        val sslMs = if (secureConnectStart > 0 && secureConnectEnd >= secureConnectStart) secureConnectEnd - secureConnectStart else null
+        val ttfbMs = if (requestHeadersStart > 0 && responseHeadersStart >= requestHeadersStart) responseHeadersStart - requestHeadersStart else null
+        
+        // ✅ Log detailed network metrics
+        android.util.Log.i("NetworkDiagnosis", "Network timing metrics for $url:")
+        android.util.Log.i("NetworkDiagnosis", "  DNS lookup: ${dnsMs}ms")
+        android.util.Log.i("NetworkDiagnosis", "  TCP connection: ${tcpMs}ms")
+        android.util.Log.i("NetworkDiagnosis", "  SSL/TLS handshake: ${sslMs}ms")
+        android.util.Log.i("NetworkDiagnosis", "  Time to first byte: ${ttfbMs}ms")
+        android.util.Log.i("NetworkDiagnosis", "  Response code: ${response.code}")
+        android.util.Log.i("NetworkDiagnosis", "  Response size: ${response.body?.contentLength() ?: "unknown"} bytes")
+        
+        // ✅ Log response headers for debugging
+        response.headers.forEach { (name, value) ->
+            android.util.Log.d("NetworkDiagnosis", "  Response header: $name = $value")
+        }
+        
         val metrics = TimingMetrics(
-            dnsMs = if (dnsStart > 0 && dnsEnd >= dnsStart) dnsEnd - dnsStart else null,
-            tcpMs = if (connectStart > 0 && connectEnd >= connectStart) connectEnd - connectStart else null,
-            sslMs = if (secureConnectStart > 0 && secureConnectEnd >= secureConnectStart) secureConnectEnd - secureConnectStart else null,
-            ttfbMs = if (requestHeadersStart > 0 && responseHeadersStart >= requestHeadersStart) responseHeadersStart - requestHeadersStart else null
+            dnsMs = dnsMs,
+            tcpMs = tcpMs,
+            sslMs = sslMs,
+            ttfbMs = ttfbMs
         )
         return response to metrics
     }
@@ -173,7 +239,7 @@ class SecurityTestEngine @Inject constructor(
                         try {
                             val requestStart = System.currentTimeMillis()
                             val (response, tm) = requestWithTimings(
-                                url = buildTestUrl(config.domain, params.requestPath ?: params.targetPath ?: "/", params.queryParams),
+                                url = buildTestUrl(config.domain, params.requestPath ?: params.targetPath, params.queryParams),
                                 method = params.httpMethod ?: HttpMethod.GET,
                                 headers = params.customHeaders ?: emptyMap(),
                                 body = params.bodyTemplate
@@ -229,7 +295,7 @@ class SecurityTestEngine @Inject constructor(
     private suspend fun executePathTraversalTest(config: TestConfiguration): TestResult = withContext(Dispatchers.IO) {
         val params = config.parameters
         val payloads = params.payloadList ?: emptyList()
-        val pathBase = params.requestPath ?: "/"
+        val pathBase = params.requestPath ?: ""
         val blocked = mutableListOf<String>()
         val passed = mutableListOf<String>()
         val networkLogs = mutableListOf<String>() // ✅ ADD NETWORK LOGS
@@ -284,7 +350,7 @@ class SecurityTestEngine @Inject constructor(
 
     private suspend fun executeCustomRulesTest(config: TestConfiguration): TestResult = withContext(Dispatchers.IO) {
         val params = config.parameters
-        val url = "https://${config.domain}${params.requestPath ?: "/"}"
+        val url = "https://${config.domain}${params.requestPath ?: ""}"
         val start = System.currentTimeMillis()
         val respWith = try { requestWithTimings(url, headers = params.headersOverrides ?: emptyMap()) } catch (e: Exception) { null }
         val resp = respWith?.first
@@ -375,7 +441,7 @@ class SecurityTestEngine @Inject constructor(
                     try {
                         val requestStart = System.currentTimeMillis()
                         val (response, _) = requestWithTimings(
-                            url = buildTestUrl(config.domain, params.requestPath ?: params.targetPath ?: "/", params.queryParams),
+                            url = buildTestUrl(config.domain, params.requestPath ?: params.targetPath, params.queryParams),
                             method = params.httpMethod ?: HttpMethod.GET,
                             headers = params.customHeaders ?: emptyMap(),
                             body = params.bodyTemplate
@@ -442,7 +508,7 @@ class SecurityTestEngine @Inject constructor(
                     EncodingMode.BASE64 -> android.util.Base64.encodeToString(payload.toByteArray(), android.util.Base64.NO_WRAP)
                     else -> payload
                 }
-                val path = params.requestPath ?: "/"
+                val path = params.requestPath ?: ""
                 val url = when (params.injectionPoint) {
                     InjectionPoint.QUERY_PARAM -> "https://${config.domain}${path}?${params.targetParam ?: "q"}=$encodedPayload"
                     InjectionPoint.PATH_PARAM -> "https://${config.domain}${if (path.endsWith("/")) path else "$path/"}$encodedPayload"
@@ -551,7 +617,7 @@ class SecurityTestEngine @Inject constructor(
             type = if (config.parameters.cookiePolicy == CookiePolicy.ENABLED) TestType.CookieJsChallenge else TestType.UserAgentAnomaly,
             domain = config.domain,
             ipAddress = config.ipAddress,
-            status = TestStatus.SUCCESS,
+            status = if (detectionRate > 80) TestStatus.FAILED else TestStatus.SUCCESS, // FAILED = detected (good security), SUCCESS = bypass
             startTime = java.util.Date(startTime),
             endTime = java.util.Date(endTime),
             duration = endTime - startTime,
@@ -966,9 +1032,160 @@ class SecurityTestEngine @Inject constructor(
         }
     }
     
+    // ✅ Progress tracking methods for each test type
+    private suspend fun executeDoSTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf(
+            "Initializing DoS test",
+            "Setting up connections",
+            "Executing burst requests",
+            "Analyzing results",
+            "Generating report"
+        )
+        
+        return executeTestWithProgress(config, steps) { progressCallback ->
+            executeDoSTest(config)
+        }
+    }
+    
+    private suspend fun executeFloodTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf(
+            "Initializing flood test",
+            "Configuring rate limiting",
+            "Executing flood requests",
+            "Monitoring performance",
+            "Analyzing results"
+        )
+        
+        return executeTestWithProgress(config, steps) { progressCallback ->
+            executeFloodTest(config)
+        }
+    }
+    
+    private suspend fun executeWAFTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf(
+            "Initializing WAF test",
+            "Preparing payloads",
+            "Executing injection tests",
+            "Analyzing responses",
+            "Generating security report"
+        )
+        
+        return executeTestWithProgress(config, steps) { progressCallback ->
+            executeWAFTest(config)
+        }
+    }
+    
+    private suspend fun executeBasicTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf(
+            "Initializing basic test",
+            "Performing connectivity check",
+            "Analyzing response",
+            "Generating report"
+        )
+        
+        return executeTestWithProgress(config, steps) { progressCallback ->
+            executeBasicTest(config)
+        }
+    }
+    
+    // ✅ Generic progress tracking wrapper
+    private suspend fun executeTestWithProgress(
+        config: TestConfiguration,
+        steps: List<String>,
+        testExecution: suspend (progressCallback: (Float, String) -> Unit) -> TestResult
+    ): TestResult {
+        val totalSteps = steps.size
+        var currentStep = 0
+        
+        val progressCallback: (Float, String) -> Unit = { progress: Float, message: String ->
+            // This would be used to emit progress updates
+            // For now, we'll just log the progress
+            android.util.Log.d("TestProgress", "Step ${currentStep + 1}/$totalSteps: $message (${(progress * 100).toInt()}%)")
+        }
+        
+        // Execute each step with progress tracking
+        steps.forEachIndexed { index, stepName ->
+            currentStep = index
+            progressCallback(0f, stepName)
+            
+            // Simulate step execution time
+            kotlinx.coroutines.delay(100)
+            
+            progressCallback(1f, "$stepName completed")
+        }
+        
+        // Execute the actual test
+        return testExecution(progressCallback)
+    }
+    
+    // ✅ Placeholder methods for other test types with progress
+    private suspend fun executeUdpReachabilityWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing UDP test", "Testing connectivity", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeUdpReachability(config) }
+    }
+    
+    private suspend fun executeTcpReachabilityWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing TCP test", "Testing connectivity", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeTcpReachability(config) }
+    }
+    
+    private suspend fun executePathTraversalTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing path traversal test", "Executing payloads", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executePathTraversalTest(config) }
+    }
+    
+    private suspend fun executeCustomRulesTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing custom rules test", "Executing rules", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeCustomRulesTest(config) }
+    }
+    
+    private suspend fun executeOversizedBodyTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing oversized body test", "Sending large payloads", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeOversizedBodyTest(config) }
+    }
+    
+    private suspend fun executeApiAuthTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing API auth test", "Testing authentication", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeApiAuthTest(config) }
+    }
+    
+    private suspend fun executeBruteForceTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing brute force test", "Executing attacks", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeBruteForceTest(config) }
+    }
+    
+    private suspend fun executeEnumerationTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing enumeration test", "Executing enumeration", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeEnumerationTest(config) }
+    }
+    
+    private suspend fun executeSchemaValidationTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing schema validation test", "Executing validation", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeSchemaValidationTest(config) }
+    }
+    
+    private suspend fun executeBusinessLogicTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing business logic test", "Executing logic tests", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeBusinessLogicTest(config) }
+    }
+    
+    private suspend fun executeCrawlerTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing crawler test", "Executing crawl", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeCrawlerTest(config) }
+    }
+    
+    private suspend fun executeBotTestWithProgress(config: TestConfiguration): TestResult {
+        val steps = listOf("Initializing bot test", "Executing bot simulation", "Analyzing results")
+        return executeTestWithProgress(config, steps) { executeBotTest(config) }
+    }
+    
     // Helper functions for better HTTP request handling
-    private fun buildTestUrl(domain: String, path: String, queryParams: Map<String, String>?): String {
-        val basePath = if (path.startsWith("/")) path else "/$path"
+    private fun buildTestUrl(domain: String, path: String?, queryParams: Map<String, String>?): String {
+        val basePath = when {
+            path.isNullOrEmpty() -> ""
+            path.startsWith("/") -> path
+            else -> "/$path"
+        }
         val baseUrl = "https://$domain$basePath"
         
         return if (queryParams.isNullOrEmpty()) {

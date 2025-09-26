@@ -39,14 +39,20 @@ import kotlinx.coroutines.launch
 fun SignUpScreen(
     onNavigateToLogin: () -> Unit = {},
     onNavigateToMain: () -> Unit = {},
+    onNavigateToEmailVerification: () -> Unit = {},
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val signUpState by viewModel.signUpState.collectAsStateWithLifecycle()
     
     LaunchedEffect(signUpState) {
-        when (signUpState) {
+        when (val state = signUpState) {
             is Resource.Success -> {
-                onNavigateToMain()
+                // ✅ Check if user needs email verification
+                if (state.data?.needsVerification == true) {
+                    onNavigateToEmailVerification()
+                } else {
+                    onNavigateToMain()
+                }
             }
             else -> {}
         }
@@ -54,8 +60,8 @@ fun SignUpScreen(
     
     SignUpScreenContent(
         onNavigateToLogin = onNavigateToLogin,
-        onSignUp = { email, password, confirmPassword, displayName ->
-            viewModel.signUp(email, password, confirmPassword, displayName)
+        onSignUp = { email, password, _, displayName ->
+            viewModel.signUp(email, password, "", displayName)
         },
         signUpState = signUpState,
         selectedLang = "", // centralized in Profile; hide toggle here
@@ -249,10 +255,9 @@ private fun SignUpScreenContent(
             // Sign Up Button
             val emailValid = Validation.isLikelyEmail(email)
             val passwordValid = password.length >= 6
-            val confirmValid = confirmPassword == password && confirmPassword.isNotBlank()
-            val canSubmit = emailValid && passwordValid && confirmValid && displayName.isNotBlank() && signUpState !is Resource.Loading
+            val canSubmit = emailValid && passwordValid && displayName.isNotBlank() && signUpState !is Resource.Loading
             Button(
-                onClick = { onSignUp(email, password, confirmPassword, displayName) },
+                onClick = { onSignUp(email, password, "", displayName) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

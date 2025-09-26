@@ -113,6 +113,10 @@ class TestExecutionWorker @AssistedInject constructor(
 						android.util.Log.d("TestExecutionWorker", "Test running: ${progress.message} (${progress.progress})")
 						setProgress(workDataOf("message" to progress.message, "progress" to (progress.progress * 100).toInt()))
 					}
+					is SecurityTestEngine.TestProgress.StepCompleted -> {
+						android.util.Log.d("TestExecutionWorker", "Step completed: ${progress.stepName} (${progress.stepIndex + 1}/${progress.totalSteps})")
+						setProgress(workDataOf("message" to "Step ${progress.stepIndex + 1}/${progress.totalSteps}: ${progress.stepName} completed", "progress" to ((progress.stepIndex + 1) * 100 / progress.totalSteps)))
+					}
 					is SecurityTestEngine.TestProgress.Completed -> {
 						android.util.Log.d("TestExecutionWorker", "Test completed successfully")
 						android.util.Log.d("TestExecutionWorker", "Original result creditsUsed: ${progress.result.creditsUsed}")

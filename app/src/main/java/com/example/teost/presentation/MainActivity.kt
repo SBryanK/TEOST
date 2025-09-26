@@ -24,6 +24,7 @@ import com.example.teost.feature.main.MainScreen
 import com.example.teost.feature.auth.ForgotPasswordScreen
 import com.example.teost.feature.auth.LoginScreen
 import com.example.teost.feature.auth.SignUpScreen
+import com.example.teost.feature.auth.EmailVerificationScreen
 import com.example.teost.presentation.navigation.Screen
 import com.example.teost.core.ui.theme.EdgeOneTheme
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -184,6 +185,9 @@ class MainActivity : AppCompatActivity() {
                                             navController.navigate(Screen.Main.route) {
                                                 popUpTo(Screen.Auth.Login.route) { inclusive = true }
                                             }
+                                        },
+                                        onNavigateToEmailVerification = {
+                                            navController.navigate(Screen.Auth.EmailVerification.route)
                                         }
                                     )
                                 }
@@ -192,7 +196,20 @@ class MainActivity : AppCompatActivity() {
                                     ForgotPasswordScreen(onNavigateBack = { navController.popBackStack() })
                                 }
 
-                                // EmailVerification route removed per remediation plan
+                                composable(Screen.Auth.EmailVerification.route) {
+                                    EmailVerificationScreen(
+                                        onNavigateToLogin = {
+                                            navController.navigate(Screen.Auth.Login.route) {
+                                                popUpTo(Screen.Auth.EmailVerification.route) { inclusive = true }
+                                            }
+                                        },
+                                        onNavigateToMain = {
+                                            navController.navigate(Screen.Main.route) {
+                                                popUpTo(Screen.Auth.Login.route) { inclusive = true }
+                                            }
+                                        }
+                                    )
+                                }
 
                                 composable(Screen.Main.route) { 
                                     val currentUserId = prefs?.userId.orEmpty()

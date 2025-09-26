@@ -54,7 +54,7 @@ class HistoryDetailViewModel @Inject constructor(
                     headers = redactHeaders(it.resultDetails.headers) ?: emptyMap(),
                     dnsTime = it.resultDetails.dnsResolutionTime,
                     ttfb = it.resultDetails.ttfb,
-                    rawLogs = null,
+                    rawLogs = it.rawLogs,
                     summary = summary
                 )
             }

@@ -11,13 +11,14 @@ data class User(
     val displayName: String = "",
     val photoUrl: String? = null,
     val emailVerified: Boolean = false,
-    val credits: Int = 100, // Default starting credits
+    val credits: Int = 0, // No credits until email verified
     val isActive: Boolean = true,
     val createdAt: Date = Date(),
     val lastLoginAt: Date = Date(),
     val favoriteDomainsCount: Int = 0,
     val totalTestsRun: Int = 0,
-    val accountType: AccountType = AccountType.FREE
+    val accountType: AccountType = AccountType.FREE,
+    val needsVerification: Boolean = false // Flag for email verification flow
 ) : Parcelable
 
 enum class AccountType {

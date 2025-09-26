@@ -53,13 +53,13 @@ class AuthRepository @Inject constructor(
                 // Send email verification
                 firebaseUser.sendEmailVerification().await()
                 
-                // Create user document in Firestore
+                // Create user document in Firestore (unverified, no credits yet)
                 val user = User(
                     uid = firebaseUser.uid,
                     email = email,
                     displayName = displayName,
                     emailVerified = false,
-                    credits = 100 // Starting credits
+                    credits = 0 // No credits until email is verified
                 )
                 
                 // Non-fatal Firestore write; avoid leaving user in broken state if Firestore unavailable
@@ -72,7 +72,11 @@ class AuthRepository @Inject constructor(
                     // no-op, will backfill on next login
                 }
                 
-                emit(Resource.Success(user))
+                // ✅ SIGN OUT USER IMMEDIATELY - Standard industry practice
+                auth.signOut()
+                
+                // ✅ Return user with needsVerification flag
+                emit(Resource.Success(user.copy(needsVerification = true)))
             } else {
                 emit(Resource.Error(AppError.Authentication("Failed to create user")))
             }
@@ -89,6 +93,14 @@ class AuthRepository @Inject constructor(
             val firebaseUser = authResult.user
             
             if (firebaseUser != null) {
+                // ✅ Check email verification - Standard industry practice
+                if (!firebaseUser.isEmailVerified) {
+                    // Sign out user if email not verified
+                    auth.signOut()
+                    emit(Resource.Error(AppError.Authentication("Please verify your email before signing in. Check your inbox for a verification link.")))
+                    return@flow
+                }
+                
                 // Get user data from Firestore (fallback to Firebase user if Firestore unavailable)
                 val user = try {
                     val userDoc = firestore.collection("users")
@@ -110,11 +122,33 @@ class AuthRepository @Inject constructor(
                     )
                 }
                 
+                // ✅ Give credits on first verified login
+                val updatedUser = if (!user.emailVerified && firebaseUser.isEmailVerified) {
+                    user.copy(
+                        emailVerified = true,
+                        credits = 100 // Give starting credits after verification
+                    )
+                } else {
+                    user
+                }
+                
+                // Update user in Firestore if needed
+                if (updatedUser != user) {
+                    try {
+                        firestore.collection("users")
+                            .document(firebaseUser.uid)
+                            .set(updatedUser)
+                            .await()
+                    } catch (e: Exception) {
+                        // no-op, will sync later
+                    }
+                }
+                
                 // Save session
                 preferencesManager.saveUserSession(
-                    userId = user.uid,
-                    email = user.email,
-                    name = user.displayName,
+                    userId = updatedUser.uid,
+                    email = updatedUser.email,
+                    name = updatedUser.displayName,
                     authToken = firebaseUser.uid // Using UID as token for now
                 )
                 
@@ -128,7 +162,7 @@ class AuthRepository @Inject constructor(
                     // no-op
                 }
                 
-                emit(Resource.Success(user))
+                emit(Resource.Success(updatedUser))
             } else {
                 emit(Resource.Error(AppError.Authentication("Sign in failed")))
             }

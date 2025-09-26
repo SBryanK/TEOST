@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -94,8 +95,8 @@ fun SearchScreenContent(
     var input by rememberSaveable { mutableStateOf("") }
 
     val isLoading = state is Resource.Loading
-    val parsedTargets = remember(input) { UrlValidator.parseMultipleInputs(input) }
-    val allValid = remember(parsedTargets) { parsedTargets.isNotEmpty() && parsedTargets.all { UrlValidator.validate(it) is UrlValidator.ValidationResult.Valid } }
+    val parsedTargets by remember { derivedStateOf { UrlValidator.parseMultipleInputs(input) } }
+    val allValid by remember { derivedStateOf { parsedTargets.isNotEmpty() && parsedTargets.all { UrlValidator.validate(it) is UrlValidator.ValidationResult.Valid } } }
     val isTestEnabled = allValid && !isLoading
     val canGoToTests = input.isNotBlank() && results.any { it.statusCode in 200..399 } && !isLoading
 

@@ -22,7 +22,7 @@ class SignUpViewModel @Inject constructor(
     val signUpState: StateFlow<Resource<User>?> = _signUpState.asStateFlow()
     
     fun signUp(email: String, password: String, confirmPassword: String, displayName: String) {
-        if (!validateInput(email, password, confirmPassword, displayName)) {
+        if (!validateInput(email, password, "", displayName)) {
             return
         }
         
@@ -53,10 +53,6 @@ class SignUpViewModel @Inject constructor(
             }
             password.length < 6 -> {
                 _signUpState.value = Resource.Error(com.example.teost.util.AppError.Validation("Password must be at least 6 characters"))
-                false
-            }
-            password != confirmPassword -> {
-                _signUpState.value = Resource.Error(com.example.teost.util.AppError.Validation("Passwords do not match"))
                 false
             }
             displayName.length < 2 -> {

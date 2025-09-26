@@ -13,6 +13,10 @@ import kotlinx.coroutines.flow.update
 object TestCartStore {
     private val _items: MutableStateFlow<List<TestConfiguration>> = MutableStateFlow(emptyList())
     val items: StateFlow<List<TestConfiguration>> = _items.asStateFlow()
+    
+    // ✅ Add error state for better error handling
+    private val _errorState: MutableStateFlow<String?> = MutableStateFlow(null)
+    val errorState: StateFlow<String?> = _errorState.asStateFlow()
 
     private var persistence: CartPersistence? = null
 
@@ -26,41 +30,108 @@ object TestCartStore {
     }
 
     fun add(configuration: TestConfiguration): Boolean {
-        // Check for duplicates based on domain, category, type, and key parameters
-        val existing = _items.value.find { existing ->
-            isDuplicate(existing, configuration)
-        }
-        
-        return if (existing != null) {
-            // Duplicate found, don't add
-            false
-        } else {
-            // No duplicate, add to cart
-            val next = _items.value + configuration
-            _items.value = next
-            persistence?.persist(next)
-            true
+        try {
+            // ✅ Clear previous errors
+            _errorState.value = null
+            
+            // ✅ Validate configuration
+            val validationResult = validateConfiguration(configuration)
+            if (!validationResult.isValid) {
+                _errorState.value = validationResult.errorMessage
+                return false
+            }
+            
+            // Check for duplicates based on domain, category, type, and key parameters
+            val existing = _items.value.find { existing ->
+                isDuplicate(existing, configuration)
+            }
+            
+            return if (existing != null) {
+                // Duplicate found, don't add
+                _errorState.value = "Test configuration already exists for domain: ${configuration.domain}"
+                false
+            } else {
+                // No duplicate, add to cart
+                val next = _items.value + configuration
+                _items.value = next
+                try {
+                    persistence?.persist(next)
+                } catch (e: Exception) {
+                    _errorState.value = "Failed to persist cart: ${e.message}"
+                    // Revert the change
+                    _items.value = _items.value.dropLast(1)
+                    return false
+                }
+                true
+            }
+        } catch (e: Exception) {
+            _errorState.value = "Failed to add configuration: ${e.message}"
+            return false
         }
     }
     
     fun addOrUpdate(configuration: TestConfiguration): Boolean {
-        val existingIndex = _items.value.indexOfFirst { existing ->
-            isDuplicate(existing, configuration)
-        }
-        
-        return if (existingIndex >= 0) {
-            // Update existing configuration
-            val current = _items.value.toMutableList()
-            current[existingIndex] = configuration
-            _items.value = current
-            persistence?.persist(current)
-            false // Indicates update, not add
-        } else {
-            // Add new configuration
-            val next = _items.value + configuration
-            _items.value = next
-            persistence?.persist(next)
-            true // Indicates new add
+        try {
+            // ✅ Clear previous errors
+            _errorState.value = null
+            
+            // ✅ Validate configuration
+            val validationResult = validateConfiguration(configuration)
+            if (!validationResult.isValid) {
+                _errorState.value = validationResult.errorMessage
+                return false
+            }
+            
+            val existingIndex = _items.value.indexOfFirst { existing ->
+                isDuplicate(existing, configuration)
+            }
+            
+            return if (existingIndex >= 0) {
+                // ✅ Update existing configuration with validation
+                val current = _items.value.toMutableList()
+                val existing = current[existingIndex]
+                
+                // ✅ Validate update
+                val updateValidation = validateUpdate(existing, configuration)
+                if (!updateValidation.isValid) {
+                    _errorState.value = updateValidation.errorMessage
+                    return false
+                }
+                
+                // ✅ Update with timestamp
+                current[existingIndex] = configuration.copy(
+                    // Add lastModified timestamp if TestConfiguration has it
+                )
+                _items.value = current
+                
+                try {
+                    persistence?.persist(current)
+                } catch (e: Exception) {
+                    _errorState.value = "Failed to persist cart update: ${e.message}"
+                    // Revert the change
+                    _items.value = _items.value.toMutableList().apply { 
+                        this[existingIndex] = existing 
+                    }
+                    return false
+                }
+                false // Indicates update, not add
+            } else {
+                // ✅ Add new configuration
+                val next = _items.value + configuration
+                _items.value = next
+                try {
+                    persistence?.persist(next)
+                } catch (e: Exception) {
+                    _errorState.value = "Failed to persist cart: ${e.message}"
+                    // Revert the change
+                    _items.value = _items.value.dropLast(1)
+                    return false
+                }
+                true // Indicates new add
+            }
+        } catch (e: Exception) {
+            _errorState.value = "Failed to add or update configuration: ${e.message}"
+            return false
         }
     }
     
@@ -120,8 +191,95 @@ object TestCartStore {
     }
 
     fun clear() {
-        _items.value = emptyList()
-        persistence?.persist(emptyList())
+        try {
+            _errorState.value = null
+            _items.value = emptyList()
+            persistence?.persist(emptyList())
+        } catch (e: Exception) {
+            _errorState.value = "Failed to clear cart: ${e.message}"
+        }
+    }
+    
+    // ✅ Clear error state
+    fun clearError() {
+        _errorState.value = null
+    }
+    
+    // ✅ Validation functions
+    private data class ValidationResult(
+        val isValid: Boolean,
+        val errorMessage: String? = null
+    )
+    
+    private fun validateConfiguration(configuration: TestConfiguration): ValidationResult {
+        // ✅ Domain validation
+        if (configuration.domain.isBlank()) {
+            return ValidationResult(false, "Domain cannot be empty")
+        }
+        
+        // ✅ Domain format validation
+        if (!isValidDomain(configuration.domain)) {
+            return ValidationResult(false, "Invalid domain format: ${configuration.domain}")
+        }
+        
+        // ✅ Test ID validation
+        if (configuration.testId.isBlank()) {
+            return ValidationResult(false, "Test ID cannot be empty")
+        }
+        
+        // ✅ Parameters validation
+        val params = configuration.parameters
+        if (params.burstRequests != null && params.burstRequests!! < 1) {
+            return ValidationResult(false, "Burst requests must be at least 1")
+        }
+        
+        if (params.rpsTarget != null && params.rpsTarget!! < 1) {
+            return ValidationResult(false, "RPS target must be at least 1")
+        }
+        
+        if (params.concurrentConnections != null && params.concurrentConnections!! < 1) {
+            return ValidationResult(false, "Concurrent connections must be at least 1")
+        }
+        
+        if (params.durationSec != null && params.durationSec!! < 1) {
+            return ValidationResult(false, "Duration must be at least 1 second")
+        }
+        
+        // ✅ Payload validation
+        if (params.payloadList != null && params.payloadList!!.isEmpty()) {
+            return ValidationResult(false, "Payload list cannot be empty")
+        }
+        
+        return ValidationResult(true)
+    }
+    
+    private fun validateUpdate(existing: TestConfiguration, new: TestConfiguration): ValidationResult {
+        // ✅ Basic validation first
+        val basicValidation = validateConfiguration(new)
+        if (!basicValidation.isValid) {
+            return basicValidation
+        }
+        
+        // ✅ Domain consistency check
+        if (existing.domain != new.domain) {
+            return ValidationResult(false, "Cannot change domain in update")
+        }
+        
+        // ✅ Test type consistency check
+        if (existing.parameters.testTypeHint != new.parameters.testTypeHint) {
+            return ValidationResult(false, "Cannot change test type in update")
+        }
+        
+        return ValidationResult(true)
+    }
+    
+    private fun isValidDomain(domain: String): Boolean {
+        return try {
+            // Basic domain validation
+            domain.matches(Regex("^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\\.[a-zA-Z]{2,}$"))
+        } catch (e: Exception) {
+            false
+        }
     }
 
     interface CartPersistence {

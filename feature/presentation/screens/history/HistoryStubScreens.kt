@@ -162,7 +162,7 @@ fun HistoryScreen(
                 Text(androidx.compose.ui.res.stringResource(id = com.example.teost.core.ui.R.string.filters_title), style = MaterialTheme.typography.titleLarge)
                 Text(androidx.compose.ui.res.stringResource(id = com.example.teost.core.ui.R.string.label_status), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    items(listOf<TestStatus?>(null) + TestStatus.entries) { st ->
+                    items(listOf<TestStatus?>(null) + listOf(TestStatus.SUCCESS, TestStatus.FAILED)) { st ->
                         val selected = selectedStatus == st
                         FilterChip(
                             selected = selected,

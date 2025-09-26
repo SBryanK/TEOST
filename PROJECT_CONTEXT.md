@@ -5,7 +5,7 @@
 **Policy**: This file is the single source of truth for architecture, routes, and decisions. Any code change that adds/modifies routes MUST update `core/ui/navigation/Screen.kt` and this file in the same change. Any feature/module change MUST update this file.
 
 **Last Updated**: January 2025  
-**Version**: v20 - Complete Implementation Status  
+**Version**: v21 - Navigation & UI Improvements  
 **Status**: ✅ PRODUCTION READY
 
 ## 1. Project Overview & Current Status (January 2025)
@@ -25,14 +25,14 @@ TEO SecTest is a **production-ready Android application** designed to test and v
 
 - **Status**: ✅ **PRODUCTION READY** - All core features implemented and operational
 - **Build Status**: ✅ **SUCCESSFUL** - APK generation working (30MB+ debug APK)
-- **Test Coverage**: ✅ **14 Security Test Types** available in UI (19 total in model)
+- **Test Coverage**: ✅ **12 Security Test Types** available in UI (19 total in model)
 - **Architecture**: ✅ **MVVM + Clean Architecture** with proper module separation
 - **UI/UX**: ✅ **Complete Material 3** implementation with Tencent-inspired theme
 
 ### 🚀 **Key Features (100% Implemented)**
 
 - **🔍 Connection Testing**: Multi-target URL/domain/IP input with real-time results
-- **🛡️ Security Test Engine**: 14 UI test types with full traffic modification capabilities
+- **🛡️ Security Test Engine**: 12 UI test types with full traffic modification capabilities
 - **⚡ Test Execution**: Background WorkManager with real-time progress tracking
 - **📊 History Management**: Paging, filtering, search, and detailed metrics
 - **👤 Profile System**: Credits, help, privacy policy, language switching
@@ -191,27 +191,25 @@ feature:presentation
 
 ### 🛡️ **Security Test Engine - Comprehensive Implementation**
 
-The application implements a **comprehensive security testing engine** with **19 test types defined in model** and **14 test types available in UI**. All traffic can be fully modified and customized before sending to target domains:
+The application implements a **comprehensive security testing engine** with **19 test types defined in model** and **12 test types available in UI**. All traffic can be fully modified and customized before sending to target domains:
 
-#### **📱 Test Types Available in UI (14 types - Practical for Android):**
+#### **📱 Test Types Available in UI (12 types - Practical for Android):**
 
 **DDOS_PROTECTION (2 types):**
 
 - **HttpSpike**: HTTP spike attack with configurable burst requests, intervals, concurrency, and duration
 - **ConnectionFlood**: Connection flooding with RPS targeting, duration control, and concurrent connections
 
-**WEB_PROTECTION (5 types):**
+**WEB_PROTECTION (3 types):**
 
 - **SqlInjection**: SQL injection with customizable payloads, encoding modes, injection points, and target parameters
 - **XssTest**: Cross-site scripting with XSS payloads, encoding options, and injection point selection
 - **PathTraversal**: Directory traversal with path traversal payloads and encoding modes
-- **CustomRulesValidation**: Custom WAF rules testing with configurable headers and request modifications
 - **OversizedBody**: Large payload attacks with configurable body size and JSON field counts
 
-**BOT_MANAGEMENT (3 types):**
+**BOT_MANAGEMENT (2 types):**
 
 - **UserAgentAnomaly**: Bot detection testing with customizable User-Agent profiles and header configurations
-- **CookieJsChallenge**: Cookie/JS challenge testing with cookie policies and User-Agent simulation
 - **WebCrawlerSimulation**: Web crawler simulation with crawl depth and robots.txt respect options
 
 **API_PROTECTION (4 types):**
@@ -221,7 +219,7 @@ The application implements a **comprehensive security testing engine** with **19
 - **SchemaInputValidation**: Schema fuzzing with custom fuzz cases, content types, and validation endpoints
 - **BusinessLogicAbuse**: Business logic abuse with replay counts, delays, and workflow endpoints
 
-#### **🔧 Additional Test Types in Model (5 types - Not in UI):**
+#### **🔧 Additional Test Types in Model (7 types - Not in UI):**
 
 **Available in model but not exposed in UI (comprehensive architecture):**
 
@@ -235,6 +233,8 @@ The application implements a **comprehensive security testing engine** with **19
 - **Log4ShellProbe**: Log4Shell vulnerability testing (model only, uses WAF engine)
 - **EdgeRateLimiting**: Rate limiting testing (model only, uses flood engine)
 - **LongQuery**: Long query testing (model only, uses oversized body engine)
+- **CustomRulesValidation**: Custom WAF rules testing (removed from UI - not relevant)
+- **CookieJsChallenge**: Cookie/JS challenge testing (removed from UI - no implementation)
 
 #### **🚀 Traffic Modification Capabilities:**
 
@@ -516,15 +516,16 @@ While the application is complete and functional, potential future enhancements 
 
 ## 8. Recent Implementation Updates & Version History
 
-### 🔄 **Latest Updates (v20 - 22 SEPT 2025)**
+### 🔄 **Latest Updates (v21 - January 2025)**
 
 #### **✅ Major Improvements**
 
-- **Parameter Visibility Enhancement**: HttpSpike now shows all parameters (burstRequests, burstIntervalMs) in UI
-- **Traffic Modification**: Complete user control over HTTP requests before sending to target domains
-- **Test Type Architecture**: 19 test types in model, 14 practical types exposed in UI
-- **Attack Customization**: Full payload, header, method, and timing customization for all test types
-- **Engine Consistency**: All UI test types have working engine implementations with traffic modification
+- **Navigation Flow Fix**: Back button now properly returns to previous screen in navigation stack
+- **Test Type Cleanup**: Removed 2 irrelevant test types (CustomRulesValidation, CookieJsChallenge) from UI
+- **Numeric Input Enhancement**: All numeric parameters now allow user to clear and type any value
+- **Request Path Fix**: No automatic "/" added when user provides empty path input
+- **UI Optimization**: 12 relevant test types remain in UI, all with proper configuration
+- **GitIgnore Update**: Comprehensive .gitignore file for Android development
 
 #### **🛠️ Technical Enhancements**
 
@@ -544,7 +545,8 @@ While the application is complete and functional, potential future enhancements 
 
 ### 📈 **Version History Summary**
 
-- **v20 (Current)**: Complete implementation status, production ready
+- **v21 (Current)**: Navigation flow fixes, test type cleanup, input enhancements
+- **v20**: Complete implementation status, production ready
 - **v19**: Full feature implementation with comprehensive testing
 - **v18**: Major UI/UX improvements and i18n implementation
 - **v17**: Security enhancements and cloud sync implementation
@@ -558,7 +560,7 @@ While the application is complete and functional, potential future enhancements 
 
 ### 🏆 **Key Achievements**
 
-- **19 Security Test Types** in model (14 in UI) with comprehensive traffic modification
+- **19 Security Test Types** in model (12 in UI) with comprehensive traffic modification
 - **40+ Test Parameters** supporting detailed test configuration
 - **Real Network Analysis** with DNS/TTFB/TCP/SSL timing capture
 - **Encrypted Body Analysis** with AES-256-GCM client-side encryption
@@ -694,7 +696,7 @@ teost/
 
 ---
 
-**Document Version**: v20 - Complete Implementation Status  
+**Document Version**: v21 - Navigation & UI Improvements  
 **Last Updated**: January 2025  
 **Status**: ✅ Production Ready  
 **Maintainer**: TEO SecTest Development Team
