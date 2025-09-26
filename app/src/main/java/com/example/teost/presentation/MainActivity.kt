@@ -180,15 +180,7 @@ class MainActivity : AppCompatActivity() {
 
                                 composable(Screen.Auth.SignUp.route) {
                                     SignUpScreen(
-                                        onNavigateToLogin = { navController.popBackStack() },
-                                        onNavigateToMain = {
-                                            navController.navigate(Screen.Main.route) {
-                                                popUpTo(Screen.Auth.Login.route) { inclusive = true }
-                                            }
-                                        },
-                                        onNavigateToEmailVerification = {
-                                            navController.navigate(Screen.Auth.EmailVerification.route)
-                                        }
+                                        onNavigateToLogin = { navController.popBackStack() }
                                     )
                                 }
 

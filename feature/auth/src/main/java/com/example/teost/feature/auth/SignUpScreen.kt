@@ -38,8 +38,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun SignUpScreen(
     onNavigateToLogin: () -> Unit = {},
-    onNavigateToMain: () -> Unit = {},
-    onNavigateToEmailVerification: () -> Unit = {},
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
     val signUpState by viewModel.signUpState.collectAsStateWithLifecycle()
@@ -47,12 +45,8 @@ fun SignUpScreen(
     LaunchedEffect(signUpState) {
         when (val state = signUpState) {
             is Resource.Success -> {
-                // ✅ Check if user needs email verification
-                if (state.data?.needsVerification == true) {
-                    onNavigateToEmailVerification()
-                } else {
-                    onNavigateToMain()
-                }
+                // ✅ Always navigate back to login after successful sign up
+                onNavigateToLogin()
             }
             else -> {}
         }
