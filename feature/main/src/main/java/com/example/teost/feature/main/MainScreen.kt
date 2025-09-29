@@ -104,7 +104,7 @@ fun MainScreen(
         contentWindowInsets = WindowInsets.safeDrawing,
         bottomBar = {
             val transition = updateTransition(targetState = currentDestination?.route, label = "bottom_nav")
-            val bgColor by transition.animateColor(label = "nav_bg") { _ -> MaterialTheme.colorScheme.background }
+            val bgColor = MaterialTheme.colorScheme.background
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
